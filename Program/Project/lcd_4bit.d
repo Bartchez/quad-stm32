@@ -12,4 +12,5 @@ lcd_4bit.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_rcc.h
 lcd_4bit.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_spi.h
 lcd_4bit.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_tim.h
 lcd_4bit.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
+lcd_4bit.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_i2c.h
 lcd_4bit.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h

@@ -36,7 +36,7 @@
 
 // LEDs pins
 #define LED_BIT_1				GPIO_Pin_15
-#define LED_BIT_2				GPIO_Pin_11
+#define LED_BIT_2				GPIO_Pin_9
 #define LED_BIT_3				GPIO_Pin_13
 #define LED_BIT_4				GPIO_Pin_12
 
@@ -54,17 +54,17 @@
 
 
 /*********************** PWM - LCD *************************/	 
-#ifdef PILOT
+//#ifdef PILOT
 	// PWM port
 	#define PWM_PORT				GPIOB
 
 	// PWM pins
 	#define PWM_BIT_1				GPIO_Pin_8
-#endif
+//#endif
 
 
 /*********************** USART - GPS *************************/	 
-#ifdef QUAD
+//#ifdef QUAD
 	// GPS - USART interface
 	#define GPS_USART				USART2
 
@@ -74,11 +74,11 @@
 	// GPS - USART pins
 	#define GPS_BIT_TX				GPIO_Pin_2
 	#define GPS_BIT_RX				GPIO_Pin_3
-#endif
+//#endif
 
 
 /*********************** TEMPERATURE *************************/	 
-#ifdef QUAD
+//#ifdef QUAD
 
 	// GPS - USART port
 	#define TEMPERATURE_PORT		GPIOC
@@ -91,16 +91,15 @@
 	#define TEMPERATURE_BIT_5		GPIO_Pin_7
 	#define TEMPERATURE_BIT_6		GPIO_Pin_8
 
-#endif
+//#endif
 
 
-/***
- * Communicatin commands
- */
+/*********************** PRESSURE *************************/	 
 
-#define RFM12_TEMPERATURE_CMD	0x1A
-#define RFM12_PRESSURE_CMD		0x2A
-#define RFM12_GPS_CMD			0x3A
-#define RFM12_TENSION_CMD		0x4A
-#define RFM12_CURRENT_CMD		0x5A
+// PRESSURE - I2C port
+#define PRESSURE_PORT		GPIOB
+
+// PRESSURE - I2C pins
+#define PRESSURE_BIT_1		GPIO_Pin_10
+#define PRESSURE_BIT_2		GPIO_Pin_11
 

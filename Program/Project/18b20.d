@@ -13,6 +13,7 @@
 18b20.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_spi.h
 18b20.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_tim.h
 18b20.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
+18b20.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_i2c.h
 18b20.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 18b20.o: ..\_Application\qdt_config.h
 18b20.o: C:\Keil\ARM\RV31\Inc\inttypes.h

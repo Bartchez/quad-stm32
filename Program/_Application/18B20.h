@@ -32,7 +32,7 @@ float ds18b20_read_temp(uint16_t pin);
 void _delay_us(u8 us);
 
 // keep measured temperatures from 6 sensors
-static float temp_measurements[6];
+extern volatile float temp_measurements[6];
 
 // read temp values from 6 sensors and save to temp_measurements array
 void ds18b20_read_temps(void);

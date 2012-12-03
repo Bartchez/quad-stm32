@@ -122,25 +122,27 @@ void PendSV_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
-void SysTick_Handler(void)
-{
-}
-
 /******************************************************************************/
 /******************************************************************************/
 
 #include <stdio.h>
 #include "gps.h"
 #include "rfm12.h"
+#include "rfm12_controller.h"
+
+void SysTick_Handler(void)
+{
+	
+	// send next value
+	rf12_controller_send();
+
+	// blink
+	GPIO_WriteBit(GPIOB, GPIO_Pin_13,
+		(BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_13)));
+}
 
 void USART2_IRQHandler(void)
 {
-
 	//obsluga przerwania
 	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
 	{

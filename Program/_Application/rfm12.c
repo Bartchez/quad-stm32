@@ -37,9 +37,9 @@ void rf12_init( void ) {
 	rf12_rx = 0; rf12_tx = 0; rf12_new = 0;
 
 	// reset rejestrow na rfm12
-	rf12_trans(0xCA82);
-	rf12_trans(0xFE00);
-	rfm12_delay(0x00ffff);
+//	rf12_trans(0xCA82);
+//	rf12_trans(0xFE00);
+//	rfm12_delay(0x00ffff);
 
 	// ustawinie nowych wartosci w rejestrach
 	rf12_trans(0x80D8);//enable register,433MHz,12.5pF
@@ -57,6 +57,8 @@ void rf12_init( void ) {
 	rf12_trans(0xC800);//NOT USE
 	rf12_trans(0xC000);//1.0MHz,2.2V
 	rf12_trans(0x0000);
+
+	// odczekaj po inicializacji
 	rfm12_delay(0x00ffff);
 }
 

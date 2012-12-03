@@ -14,5 +14,6 @@ gps.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_rcc.h
 gps.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_spi.h
 gps.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_tim.h
 gps.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
+gps.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_i2c.h
 gps.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 gps.o: C:\Keil\ARM\RV31\Inc\string.h

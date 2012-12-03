@@ -416,6 +416,26 @@
               <FileType>1</FileType>
               <FilePath>..\_Application\rfm12.c</FilePath>
             </File>
+            <File>
+              <FileName>18B20.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\18B20.c</FilePath>
+            </File>
+            <File>
+              <FileName>rfm12_controller.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\rfm12_controller.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>MPL115A2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\MPL115A2.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

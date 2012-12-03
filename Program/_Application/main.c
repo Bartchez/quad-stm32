@@ -4,11 +4,14 @@
 
 // Configurations
 #include "qdt_config.h"
+#include "core_cm3.h"
 
 // Own libraries
 #include "gps.h"
 #include "rfm12.h"
 #include "18B20.h"
+#include "MPL115A2.h"
+#include "rfm12_controller.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -22,6 +25,8 @@ void GPIO_Configuration(void);
 void NVIC_Configuration(void);
 void EXTI_Configuration(void);
 void USART_Configuration(void);
+void SysTick_Configuration(void);
+void I2C_Configuration(void);
 
 /* Private functions ---------------------------------------------------------*/
 void Delay(__IO uint32_t nCount);
@@ -34,8 +39,11 @@ int main(void)
 	char test[120];
 	char text[] = "Emil";
 
+	/* NVIC Configuration */
+	NVIC_Configuration();
+
 	/* System Clocks Configuration */
-//	RCC_Configuration();
+	RCC_Configuration();
 
 	/* GPIO Configuration */
 	GPIO_Configuration();
@@ -49,11 +57,14 @@ int main(void)
 	/* EXTI Configuration */
 	EXTI_Configuration();
 
-	/* NVIC Configuration */
-	NVIC_Configuration();
-
 	/* TIM Configuration */
 	TIM_Configuration();
+
+	/* I2C Configuration */
+	I2C_Configuration();
+
+	/* SysTick Configuration */
+	SysTick_Configuration();
 
 	/* Init rfm12 module */
 	rf12_init();  
@@ -61,13 +72,14 @@ int main(void)
 	/* Init GPS sensor */
 	gps_init();
 
+	/* Init send/recive rfm12 controller */
+	rf12_controller_init();
+
 	// odcekaj po konfuguracji rfm12
 	Delay(0x0fffff);
 
 	while (1) 
 	{		 
-		// read temp values from 6 sensors and save to temp_measurements array
-//		ds18b20_read_temps();
 
 		// blink LED
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON
@@ -77,34 +89,40 @@ int main(void)
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF
     	Delay(0x5FFFF);
 
-		if (0) {
-			rf12_txstart(text, 0);
-		}
+#ifdef QUAD		
 
-		else {
+		// read temp values from 6 sensors and save to temp_measurements array
+		ds18b20_read_temps();
 
-			if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart();
+		// read pressure values sensor and save to mpl115a2_pressure ivar
+		mpl115a2_read_pressure();
+#endif
 
-			if( rf12_new )	{
+#ifdef PILOT		
 
-				ret = rf12_rxfinish(test);	// sprawdY czy odebrano kompletn1 ramke
+		if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart();
 
-				if(ret > 0 && ret < 254) {	// brak b3edów CRC - odebrana ramka
-					printf(test);		// wyolij odebrane dane do terminala PC
+		if( rf12_new )	{
 
-					test[16]=0;				// przytnij dane do 16 znaków ASCII
-				}
-				else
+			ret = rf12_rxfinish(test);	// sprawdY czy odebrano kompletn1 ramke
+
+			if(ret > 0 && ret < 254) {	// brak b3edów CRC - odebrana ramka
+				printf(test);		// wyolij odebrane dane do terminala PC
+
+				test[16]=0;				// przytnij dane do 16 znaków ASCII
+			}
+			else
 				
-				if(!ret) {					// wyst1pi3 b31d CRC lub d3ugooci ramki
-					printf("\r\n");
-					printf("--------------------\r\n");
-					printf("|  CRC error !!!   |\r\n");
-					printf("--------------------\r\n");
-					printf("\r\n");
-				}
+			if(!ret) {					// wyst1pi3 b31d CRC lub d3ugooci ramki
+				printf("\r\n");
+				printf("--------------------\r\n");
+				printf("|  CRC error !!!   |\r\n");
+				printf("--------------------\r\n");
+				printf("\r\n");
 			}
 		}
+#endif
+
 	};
 }
 
@@ -113,10 +131,6 @@ void GPIO_Configuration(void)
 {
 
 	GPIO_InitTypeDef  GPIO_InitStructure; 
-
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | 
-							RCC_APB2Periph_GPIOC | RCC_APB2Periph_SPI1 | 
-							RCC_APB2Periph_AFIO | RCC_APB2Periph_USART1, ENABLE); 
 
 	/* Configure all unused GPIO port pins in Analog Input mode (floating input
      trigger OFF), this will reduce the power consumption and increase the device
@@ -143,7 +157,6 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;  
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
     GPIO_Init(COM_PORT, &GPIO_InitStructure);
-
 
 
 	/* GPIO for LEDs */
@@ -175,7 +188,6 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(RFM12_PORT_SPI, &GPIO_InitStructure);
 
-
 #ifdef PILOT
 	/* GPIO for LCD */
 
@@ -188,6 +200,14 @@ void GPIO_Configuration(void)
 
 
 #ifdef QUAD
+	/* GPIO for I2C */
+
+    GPIO_InitStructure.GPIO_Pin =  PRESSURE_BIT_1 | PRESSURE_BIT_2;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+    GPIO_Init(PRESSURE_PORT, &GPIO_InitStructure);
+
+
 	/* GPIO for GPS */
 
 	// USART2 - TX
@@ -279,6 +299,9 @@ void RCC_Configuration(void)
 
 	/* TIM4 clock enable */	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+
+	/* I2C clock enable */	
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
 #endif
 
 }
@@ -301,7 +324,7 @@ void NVIC_Configuration(void)
 
 	//Konfiguracja NVIC - ustawienia priorytetow przerwania EXT0
 	//Wybor modelu grupowania przerwan
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
 	
 	//Wybor konfigurowanego IRQ
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
@@ -348,7 +371,7 @@ void EXTI_Configuration(void)
 	//Ustawienie generowania przerwania
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	
-	//Wyzwalanie zboczem opadajÄ…cym
+	//Wyzwalanie zboczem opadajacym
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
 	
 	//Wlaczenie przerwania
@@ -458,6 +481,67 @@ void TIM_Configuration(void)
 	/* TIM3 enable counter */
 	TIM_Cmd(TIM4, ENABLE);  
 #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void I2C_Configuration(void) 
+{
+#ifdef QUAD
+
+	I2C_InitTypeDef  I2C_InitStructure;
+		
+    I2C_DeInit(I2C2);
+    I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
+    I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+    I2C_InitStructure.I2C_OwnAddress1 = 0x30;
+    I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+    I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+    I2C_InitStructure.I2C_ClockSpeed = 100000;
+    
+    I2C_Cmd(I2C2, ENABLE);
+    I2C_Init(I2C2, &I2C_InitStructure);
+
+    I2C_AcknowledgeConfig(I2C2, ENABLE);
+#endif
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void SysTick_Configuration(void) 
+{
+#ifdef QUAD
+
+	unsigned long int Settings;
+	unsigned long int SysTick_CLKSource = SysTick_CLKSource_HCLK_Div8;
+	unsigned long int Ticks = 9000000ul;
+
+	assert_param(IS_SYSTICK_CLK_SOURCE(SysTick_CLKSource));
+
+	//Kontrola, czy wartosc poczatkowa nie przekracza max
+	if (Ticks > SYSTICK_MAXCOUNT)  while (1);
+
+	// Ustaw wartosc poczatkowa licznika
+	SysTick->LOAD = (Ticks & SYSTICK_MAXCOUNT) - 1;
+
+	// Ustaw priorytet przerwania
+	NVIC_SetPriority(SysTick_IRQn, 2);
+
+	// Ustaw wartosc aktualna licznika
+	SysTick->VAL = 0;
+
+	// Ustaw znaczniki wlaczenia SysTick IRQ i samego licznika
+	Settings = (1<<SYSTICK_TICKINT) | (1<<SYSTICK_ENABLE);
+
+	//Wybierz znacznik ustawien zrodla sygnalu zegarowego
+	if (SysTick_CLKSource == SysTick_CLKSource_HCLK) {
+		Settings |= SysTick_CLKSource_HCLK; 
+	} else {
+		Settings &= SysTick_CLKSource_HCLK_Div8;
+	} 
+
+	// Zapisz ustawienia do rejestru sterujacego SysTick (i wlacz licznik)
+	SysTick->CTRL = Settings;
+#endif
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -13,6 +13,7 @@ stm32f10x_it.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_rcc.h
 stm32f10x_it.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_spi.h
 stm32f10x_it.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_tim.h
 stm32f10x_it.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
+stm32f10x_it.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_i2c.h
 stm32f10x_it.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 stm32f10x_it.o: C:\Keil\ARM\RV31\Inc\stdio.h
 stm32f10x_it.o: ..\_Application\gps.h
@@ -21,3 +22,5 @@ stm32f10x_it.o: ..\_Application\rfm12.h
 stm32f10x_it.o: ..\_Application\qdt_config.h
 stm32f10x_it.o: C:\Keil\ARM\RV31\Inc\inttypes.h
 stm32f10x_it.o: ..\_Application\rfm12_hw.h
+stm32f10x_it.o: ..\_Application\rfm12_controller.h
+stm32f10x_it.o: ..\_Application\qdt_config.h

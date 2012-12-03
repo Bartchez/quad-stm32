@@ -15,6 +15,7 @@ rfm12.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_rcc.h
 rfm12.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_spi.h
 rfm12.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_tim.h
 rfm12.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
+rfm12.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_i2c.h
 rfm12.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 rfm12.o: ..\_Application\rfm12_hw.h
 rfm12.o: C:\Keil\ARM\RV31\Inc\stdio.h

@@ -421,6 +421,21 @@
               <FileType>1</FileType>
               <FilePath>..\_Application\18B20.c</FilePath>
             </File>
+            <File>
+              <FileName>rfm12_controller.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\rfm12_controller.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>MPL115A2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\MPL115A2.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -465,6 +480,11 @@
               <FileName>stm32f10x_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_i2c.c</FilePath>
             </File>
           </Files>
         </Group>

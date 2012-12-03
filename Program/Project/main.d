@@ -12,6 +12,7 @@ main.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_rcc.h
 main.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_spi.h
 main.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_tim.h
 main.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
+main.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_i2c.h
 main.o: ..\..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 main.o: ..\_Application\qdt_config.h
 main.o: C:\Keil\ARM\RV31\Inc\inttypes.h
@@ -22,4 +23,7 @@ main.o: ..\_Application\rfm12.h
 main.o: ..\_Application\qdt_config.h
 main.o: ..\_Application\rfm12_hw.h
 main.o: ..\_Application\18B20.h
+main.o: ..\_Application\qdt_config.h
+main.o: ..\_Application\MPL115A2.h
+main.o: ..\_Application\rfm12_controller.h
 main.o: ..\_Application\qdt_config.h
