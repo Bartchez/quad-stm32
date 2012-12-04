@@ -12,6 +12,9 @@
 #include "18B20.h" 
 #include "MPL115A2.h" 
 #include "rfm12_controller.h" 
+
+#include "./../../Libraries/FATFs/src/ff.h"
+#include "./../../Libraries/FATFs/src/diskio.h"
  
 /* Private typedef -----------------------------------------------------------*/ 
 /* Private define ------------------------------------------------------------*/ 
@@ -199,6 +202,22 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(PWM_PORT, &GPIO_InitStructure); 
+
+
+	/* GPIO for SD */ 
+ 
+    // SD - CS 
+    GPIO_InitStructure.GPIO_Pin = SD_BIT_SS;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(SD_PORT_SS, &GPIO_InitStructure);
+
+    //SD - SCK, MISO, MOSI
+    GPIO_InitStructure.GPIO_Pin = SD_BIT_SCK | SD_BIT_MISO | SD_BIT_MOSI;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(SD_PORT_SPI, &GPIO_InitStructure);
+
 #endif 
  
  
@@ -306,7 +325,12 @@ void RCC_Configuration(void)
 	/* I2C clock enable */	 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE); 
 #endif 
- 
+
+#ifdef PILOT 
+	/* SPI2 clock enable */ 
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE); 
+#endif 
+
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -389,7 +413,7 @@ void SPI_Configuration(void) {
  
 	/* SPI for rfm12 */ 
  
-	// Konfiguracja SPI 
+	// Konfiguracja SPI1 
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex; 
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master; 
 	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b; 
@@ -401,6 +425,24 @@ void SPI_Configuration(void) {
 	SPI_InitStructure.SPI_CRCPolynomial = 7; 
 	SPI_Init(RFM12_SPI, &SPI_InitStructure); 
 	SPI_Cmd(RFM12_SPI, ENABLE);  
+
+#ifdef PILOT
+	
+	/* SPI for SD */ 
+
+	// Konfiguracja SPI2
+	SPI_InitStructure.SPI_Direction =  SPI_Direction_2Lines_FullDuplex;
+    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;              
+    SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;  
+    SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;
+    SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
+    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
+    SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    SPI_InitStructure.SPI_CRCPolynomial = 7;
+    SPI_Init(SD_SPI, &SPI_InitStructure);   
+    SPI_Cmd(SD_SPI, ENABLE);
+#endif
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 

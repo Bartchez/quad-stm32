@@ -4,8 +4,11 @@
 /* Only rcvr_spi(), xmit_spi(), disk_timerproc() and some macros         */
 /* are platform dependent.                                               */
 /*-----------------------------------------------------------------------*/
-#include "stm32f10x_lib.h"
+//#include "stm32f10x_lib.h"
 #include "diskio.h"
+
+// pin mappings
+#include "qdt_config.h"
 
 /* Definitions for MMC/SDC command */
 #define CMD0    (0x40+0)    /* GO_IDLE_STATE */
@@ -45,21 +48,21 @@ BYTE PowerFlag = 0;     /* indicates if "power" is on */
 static
 void SELECT (void) 		// CS w stan niski
 {
-	GPIO_ResetBits(GPIOA, GPIO_Pin_4);
+	GPIO_ResetBits(SD_PORT_SS, SD_BIT_SS);
 }
 
 static
 void DESELECT (void) 	// CS w stan wysoki
 {
-	GPIO_SetBits(GPIOA, GPIO_Pin_4);
+	GPIO_SetBits(SD_PORT_SS, SD_BIT_SS);
 }
 
 static
 void xmit_spi (BYTE Data)  // Wyslanie bajtu do SD
 {
   // Wyslanie bajtu
-  while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
-  SPI_I2S_SendData(SPI1, Data);
+  while (SPI_I2S_GetFlagStatus(SD_SPI, SPI_I2S_FLAG_TXE) == RESET);
+  SPI_I2S_SendData(SD_SPI, Data);
 }
 
 static
@@ -68,12 +71,12 @@ BYTE rcvr_spi (void) 		// Odebranie bajtu z SD
   u8 Data = 0;
 
   // Wyslanie 0xFF
-  while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
-  SPI_I2S_SendData(SPI1, 0xFF);
+  while (SPI_I2S_GetFlagStatus(SD_SPI, SPI_I2S_FLAG_TXE) == RESET);
+  SPI_I2S_SendData(SD_SPI, 0xFF);
 
   // Odebranie bajtu
-  while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
-  Data = SPI_I2S_ReceiveData(SPI1);
+  while (SPI_I2S_GetFlagStatus(SD_SPI, SPI_I2S_FLAG_RXNE) == RESET);
+  Data = SPI_I2S_ReceiveData(SD_SPI);
 
   return Data;
 }

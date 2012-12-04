@@ -1,6 +1,10 @@
 #include "i2c.h"
 #include "MPL115A2.h"
 
+//others
+#include <stdio.h>
+#include <string.h>
+
 // keep measured pressur
 volatile float mpl115a2_pressure;
 volatile char mpl115a2_pressure_string[10]; 

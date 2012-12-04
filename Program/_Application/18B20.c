@@ -1,5 +1,9 @@
 #include "18B20.h"
 
+//others
+#include <stdio.h>
+#include <string.h>
+
 volatile float temp_measurements[6];
 volatile char temp_measurements_string[50];
 
