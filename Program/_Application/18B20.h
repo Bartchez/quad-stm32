@@ -34,6 +34,9 @@ void _delay_us(u8 us);
 // keep measured temperatures from 6 sensors
 extern volatile float temp_measurements[6];
 
+// keep measured temperatures from 6 sensors as array of chars
+extern volatile char temp_measurements_string[50];
+
 // read temp values from 6 sensors and save to temp_measurements array
 void ds18b20_read_temps(void);
 #endif /*_18B20_H*/

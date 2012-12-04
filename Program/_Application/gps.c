@@ -1,5 +1,7 @@
 #include "gps.h"
 
+volatile char gps_string[50];
+
 /* Private vars */
 volatile uint16_t RxCounter;
 volatile char RxBuffer[256]; //bufor tymczasowy, przechowuje dane odebrane z USART2
@@ -238,4 +240,10 @@ void gps_pool(void) {
 			RxCounter = 0;
 		}
 	}
+
+	// create output string
+    sprintf(gps_string, "X:%s,%s,%s,%s,%s", gps_time(), gps_latitude(),
+					  									  gps_longitude(), gps_speed(), 
+														  gps_direction());    
+
 }

@@ -69,48 +69,31 @@ void rf12_controller_send() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_controller_send_temperatures() {
 
-	char out[50]; 
-	// create output string
-    sprintf(out, "X%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", temp_measurements[0], temp_measurements[1],
-												  temp_measurements[2], temp_measurements[3], 
-												  temp_measurements[4], temp_measurements[5]);    
-
 	// set CMD value
-	out[0] = RFM12_TEMPERATURE_CMD;
+	temp_measurements_string[0] = RFM12_TEMPERATURE_CMD;
 
 	// send string
-	rf12_txstart(out, 0);
-
+	rf12_txstart(temp_measurements_string, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_controller_send_pressur() {
-	char out[10]; 
-	// create output string
-    sprintf(out, "X%f", mpl115a2_pressure);    
-
 	// set CMD value
-	out[0] = RFM12_PRESSURE_CMD;
+	mpl115a2_pressure_string[0] = RFM12_PRESSURE_CMD;
 
 	// send string
-	rf12_txstart(out, 0);
+	rf12_txstart(mpl115a2_pressure_string, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_controller_send_gps() {
-/*
-	char out[50]; 
-	// create output string
-    sprintf(out, "X A:%s, B:%s, C:%s, D:%s, E:%s", gps_time(), gps_latitude(),
-									gps_longitude(), gps_speed(), 
-									gps_direction());    
 
 	// set CMD value
-	out[0] = RFM12_GPS_CMD;
+	gps_string[0] = RFM12_GPS_CMD;
 
 	// send string
-	rf12_txstart(out, 0);
-*/
+	rf12_txstart(gps_string, 0);
+
 /*
 char* gps_time(void); // zwraca tablice 12 znakow (rok,miesiac,dzien,godzina,minuta,sekunda) np. 120501120311
 char* gps_latitude(void); //zwraca szerokosc geograficzna, 10 znakow, podaje wartosc w ulamkach stopnia, ostatni znak - polkula

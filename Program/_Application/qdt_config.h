@@ -3,8 +3,8 @@
 #include <stm32f10x.h>
 
 // define QUAD or PILOT
-//#define QUAD
-#define PILOT
+#define QUAD
+//#define PILOT
 
 
 /***
@@ -16,8 +16,8 @@
 #define RFM12_SPI				SPI1
 	 
 // SPI - CS	 
-#define RFM12_PORT_SS			GPIOB
-#define RFM12_BIT_SS			GPIO_Pin_14
+#define RFM12_PORT_SS			GPIOC
+#define RFM12_BIT_SS			GPIO_Pin_1
 
 // SPI - DATA
 #define RFM12_PORT_SPI			GPIOA
@@ -36,7 +36,7 @@
  
 // LEDs pins 
 #define LED_BIT_1				GPIO_Pin_15 
-#define LED_BIT_2				GPIO_Pin_9 
+#define LED_BIT_2				GPIO_Pin_14 
 #define LED_BIT_3				GPIO_Pin_13 
 #define LED_BIT_4				GPIO_Pin_12 
  
@@ -64,6 +64,9 @@
 
  
 /*********************** PRESSURE (HW) *************************/	  
+// SPI interface	 
+#define PRESSURE_I2C		I2C2
+
  
 // PRESSURE - I2C port 
 #define PRESSURE_PORT		GPIOB 

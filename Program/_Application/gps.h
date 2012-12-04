@@ -16,6 +16,9 @@
 	6: GND
 */
 
+// keep measured GPS valuesas array of chars
+extern volatile char gps_string[50];
+
 // ustawia GPIO, USART2, NVIC, wywalsc raz w main.c
 void gps_init(void);
 						

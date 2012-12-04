@@ -1,6 +1,7 @@
 #include "18B20.h"
 
 volatile float temp_measurements[6];
+volatile char temp_measurements_string[50];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void ds18b20_read_temps(void) {
@@ -14,6 +15,12 @@ void ds18b20_read_temps(void) {
 	for (i=0; i<6; ++i) {
 		temp_measurements[i] = ds18b20_read_temp(sensors[i]);
 	}
+	
+	// create output string
+    sprintf(temp_measurements_string, "X%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", temp_measurements[0], temp_measurements[1],
+						   										     temp_measurements[2], temp_measurements[3], 
+																     temp_measurements[4], temp_measurements[5]);    
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

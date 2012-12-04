@@ -37,7 +37,6 @@ int main(void)
 	uint8_t ret = 0; 
 	 
 	char test[120]; 
-	char text[] = "Emil"; 
  
 	/* NVIC Configuration */ 
 	NVIC_Configuration(); 
@@ -67,13 +66,13 @@ int main(void)
 	SysTick_Configuration(); 
  
 	/* Init rfm12 module */ 
-//	rf12_init();   
+	rf12_init();   
  
 	/* Init GPS sensor */ 
-//	gps_init(); 
+	gps_init(); 
  
 	/* Init send/recive rfm12 controller */ 
-	// rf12_controller_init(); 
+	rf12_controller_init(); 
  
 	/* Init send/recive rfm12 controller */ 
 	rf12_controller_init(); 
@@ -92,12 +91,14 @@ int main(void)
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
     	Delay(0x5FFFF); 
  
-#ifdef QUAD		 
-		// read temp values from 6 sensors and save to temp_measurements array 
-//		ds18b20_read_temps(); 
- 
+#ifdef QUAD		  
+
 		// read pressure values sensor and save to mpl115a2_pressure ivar 
-//		mpl115a2_read_pressure(); 
+		mpl115a2_read_pressure(); 
+
+		// read temp values from 6 sensors and save to temp_measurements array 
+		ds18b20_read_temps(); 
+
 #endif 
  
 #ifdef PILOT		 
@@ -203,12 +204,12 @@ void GPIO_Configuration(void)
  
 #ifdef QUAD 
 	/* GPIO for I2C */ 
- 
+
     GPIO_InitStructure.GPIO_Pin =  PRESSURE_BIT_1 | PRESSURE_BIT_2; 
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD; 
     GPIO_Init(PRESSURE_PORT, &GPIO_InitStructure); 
- 
+
  
 	/* GPIO for GPS */ 
  
@@ -488,11 +489,12 @@ void TIM_Configuration(void)
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void I2C_Configuration(void)  
 { 
+   
 #ifdef QUAD 
  
 	I2C_InitTypeDef  I2C_InitStructure; 
 		 
-    I2C_DeInit(I2C2); 
+    I2C_DeInit(PRESSURE_I2C); 
     I2C_InitStructure.I2C_Mode = I2C_Mode_I2C; 
     I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2; 
     I2C_InitStructure.I2C_OwnAddress1 = 0x30; 
@@ -500,11 +502,11 @@ void I2C_Configuration(void)
     I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; 
     I2C_InitStructure.I2C_ClockSpeed = 100000; 
      
-    I2C_Cmd(I2C2, ENABLE); 
-    I2C_Init(I2C2, &I2C_InitStructure); 
+    I2C_Cmd(PRESSURE_I2C, ENABLE); 
+    I2C_Init(PRESSURE_I2C, &I2C_InitStructure); 
  
-    I2C_AcknowledgeConfig(I2C2, ENABLE); 
-#endif 
+    I2C_AcknowledgeConfig(PRESSURE_I2C, ENABLE); 
+#endif 				  
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 

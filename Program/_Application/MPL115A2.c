@@ -3,6 +3,7 @@
 
 // keep measured pressur
 volatile float mpl115a2_pressure;
+volatile char mpl115a2_pressure_string[10]; 
 
 //*******************************************************************************************
 void mpl115a2_read_pressure(void) 
@@ -15,6 +16,9 @@ void mpl115a2_read_pressure(void)
 
 	// save pressure value
 	mpl115a2_pressure = pomiar[0]; 
+
+	// create output string	
+    sprintf(mpl115a2_pressure_string, "X%f", mpl115a2_pressure);    
 
 //	printf("\r\n Pressure: %4.1f hPa ", pomiar[0]);          //wyslanie po uart pomiarow
 //	printf("     Temperatura: %2.1f ^C", pomiar[1]);
@@ -35,7 +39,7 @@ void BaroGetPressure(float *PreTemp)
 	float padc, tadc, a0, b1, b2, c12, c11, c22, pcomp;
 	uint32_t a;
 
-	I2C_WriteOneByte(I2C2,BAROADRESS,0x12,0x01);
+	I2C_WriteOneByte(PRESSURE_I2C, BAROADRESS, 0x12, 0x01);
 
 	//wait ~5 ms
 	a=75000;
@@ -44,7 +48,7 @@ void BaroGetPressure(float *PreTemp)
 		a--;
 	}
 
-	I2C_Read(I2C2,BAROADRESS,0x00,buf,16);
+	I2C_Read(PRESSURE_I2C, BAROADRESS, 0x00, buf, 16);
 
     padc = buf[0] << 2 | buf[1] >> 6;
     tadc = buf[2] << 2 | buf[3] >> 6;
