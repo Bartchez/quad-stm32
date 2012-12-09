@@ -1,4 +1,4 @@
---cpu Cortex-M3 "main.o" "stm32f10x_it.o" "lcd_4bit.o" "gps.o" "usart.o" "rfm12.o" "18b20.o" "rfm12_controller.o" "i2c.o" "mpl115a2.o" "misc.o" "stm32f10x_gpio.o" "stm32f10x_exti.o" "stm32f10x_flash.o" "stm32f10x_rcc.o" "stm32f10x_tim.o" "stm32f10x_usart.o" "stm32f10x_spi.o" "stm32f10x_i2c.o" "stm32f10x_adc.o" ".\startup_stm32f10x_cl.o" "sd_stm32.o" "ff.o" --strict --scatter "lab1.sct" 
+--cpu Cortex-M3 "main.o" "stm32f10x_it.o" "lcd_4bit.o" "gps.o" "usart.o" "rfm12.o" "18b20.o" "rfm12_controller.o" "i2c.o" "mpl115a2.o" "sd.o" "misc.o" "stm32f10x_gpio.o" "stm32f10x_exti.o" "stm32f10x_flash.o" "stm32f10x_rcc.o" "stm32f10x_tim.o" "stm32f10x_usart.o" "stm32f10x_spi.o" "stm32f10x_i2c.o" "stm32f10x_adc.o" ".\startup_stm32f10x_cl.o" "sd_stm32.o" "ff.o" --strict --scatter "lab1.sct" 
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols 
 --info sizes --info totals --info unused --info veneers 
  --list ".\lab1.map" -o "lab1.axf"

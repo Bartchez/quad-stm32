@@ -3,8 +3,8 @@
 #include <stm32f10x.h>
 
 // define QUAD or PILOT
-#define QUAD
-//#define PILOT
+//#define QUAD
+#define PILOT
 
 
 /***
@@ -53,8 +53,9 @@
 #define LED_BIT_1				GPIO_Pin_12 
 #define LED_BIT_2				GPIO_Pin_11 
 #define LED_BIT_3				GPIO_Pin_10 
-#define LED_BIT_4				GPIO_Pin_9 
-#define LED_BIT_5				GPIO_Pin_5 
+#define LED_BIT_4				GPIO_Pin_8 
+#define LED_BIT_5				GPIO_Pin_9 
+#define LED_BIT_6				GPIO_Pin_5 
  
  
 /*********************** USART - COM (HW) *************************/	 
@@ -71,11 +72,15 @@
  
 /*********************** PWM - LCD (HW) *************************/	 
 //#ifdef PILOT 
+	
+	// PWM Timer
+	#define PWM_TIMER 				TIM3
+	
 	// PWM port 
 	#define PWM_PORT				GPIOB 
  
 	// PWM pins 
-	#define PWM_BIT_1				GPIO_Pin_8 
+	#define PWM_BIT_1				GPIO_Pin_0 
 //#endif 
 
  

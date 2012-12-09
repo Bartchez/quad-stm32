@@ -436,6 +436,11 @@
               <FileType>1</FileType>
               <FilePath>..\_Application\MPL115A2.c</FilePath>
             </File>
+            <File>
+              <FileName>sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\sd.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
