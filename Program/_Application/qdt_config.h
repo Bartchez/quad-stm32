@@ -16,8 +16,8 @@
 #define RFM12_SPI				SPI1
 	 
 // SPI - CS	 
-#define RFM12_PORT_SS			GPIOC
-#define RFM12_BIT_SS			GPIO_Pin_1
+#define RFM12_PORT_SS			GPIOA
+#define RFM12_BIT_SS			GPIO_Pin_8
 
 // SPI - DATA
 #define RFM12_PORT_SPI			GPIOA
@@ -26,11 +26,11 @@
 #define RFM12_BIT_MOSI			GPIO_Pin_7  
 
 // SPI - INT 
-#define RFM12_PORT_INT			GPIOC
-#define RFM12_BIT_INT			GPIO_Pin_0 
+#define RFM12_PORT_INT			GPIOA
+#define RFM12_BIT_INT			GPIO_Pin_9 
 
 
-/*********************** SPI - rfm12 (HW) **************************/	 
+/*********************** SPI - SD (HW) **************************/	 
 // SPI interface	 
 #define SD_SPI					SPI2
 
@@ -51,9 +51,10 @@
  
 // LEDs pins 
 #define LED_BIT_1				GPIO_Pin_12 
-#define LED_BIT_2				GPIO_Pin_9 
-#define LED_BIT_3				GPIO_Pin_4 
-#define LED_BIT_4				GPIO_Pin_5 
+#define LED_BIT_2				GPIO_Pin_11 
+#define LED_BIT_3				GPIO_Pin_10 
+#define LED_BIT_4				GPIO_Pin_9 
+#define LED_BIT_5				GPIO_Pin_5 
  
  
 /*********************** USART - COM (HW) *************************/	 
@@ -80,15 +81,15 @@
  
 /*********************** PRESSURE (HW) *************************/	  
 // SPI interface	 
-#define PRESSURE_I2C		I2C2
+#define PRESSURE_I2C		I2C1
 
  
 // PRESSURE - I2C port 
 #define PRESSURE_PORT		GPIOB 
  
 // PRESSURE - I2C pins 
-#define PRESSURE_BIT_1		GPIO_Pin_10 
-#define PRESSURE_BIT_2		GPIO_Pin_11 
+#define PRESSURE_BIT_1		GPIO_Pin_6 
+#define PRESSURE_BIT_2		GPIO_Pin_7 
 
  
 /*********************** USART - GPS (HW) *************************/	 
@@ -112,11 +113,43 @@
 	#define TEMPERATURE_PORT		GPIOC 
  
 	// GPS - USART pins 
-	#define TEMPERATURE_BIT_1		GPIO_Pin_3 
-	#define TEMPERATURE_BIT_2	 	GPIO_Pin_4 
-	#define TEMPERATURE_BIT_3		GPIO_Pin_5 
-	#define TEMPERATURE_BIT_4		GPIO_Pin_6 
-	#define TEMPERATURE_BIT_5		GPIO_Pin_7 
-	#define TEMPERATURE_BIT_6		GPIO_Pin_8 
+	#define TEMPERATURE_BIT_1		GPIO_Pin_6 
+	#define TEMPERATURE_BIT_2	 	GPIO_Pin_7 
+	#define TEMPERATURE_BIT_3		GPIO_Pin_8 
+	#define TEMPERATURE_BIT_4		GPIO_Pin_9 
+	#define TEMPERATURE_BIT_5		GPIO_Pin_10 
+	#define TEMPERATURE_BIT_6		GPIO_Pin_11 
+ 
+//#endif 
+
+
+/*********************** ADC - BATTERY VOLTAGE (HW) *************************/	  
+//#ifdef QUAD 
+
+	// ADC - port 
+	#define ADC_BATTERY_VOLTAGE_PORT			GPIOC 
+ 
+	// ADC pins (BATTERY 1) 
+	#define ADC_BATTERY_VOLTAGE_1_CELL_1		GPIO_Pin_0 
+	#define ADC_BATTERY_VOLTAGE_1_CELL_2	 	GPIO_Pin_1 
+	#define ADC_BATTERY_VOLTAGE_1_CELL_3		GPIO_Pin_2
+	 
+	// ADC pins (BATTERY 2) 
+	#define ADC_BATTERY_VOLTAGE_2_CELL_1		GPIO_Pin_3 
+	#define ADC_BATTERY_VOLTAGE_2_CELL_2	 	GPIO_Pin_4 
+	#define ADC_BATTERY_VOLTAGE_2_CELL_3		GPIO_Pin_5
+ 
+//#endif 
+
+
+/*********************** ADC - BATTERY CURRENT (HW) *************************/	  
+//#ifdef QUAD 
+
+	// ADC - port 
+	#define ADC_BATTERY_CURRENT_PORT	GPIOB 
+ 
+	// ADC pins (BATTERY 1 and 2) 
+	#define ADC_BATTERY_CURRENT_1		GPIO_Pin_0 
+	#define ADC_BATTERY_CURRENT_2	 	GPIO_Pin_1 
  
 //#endif 

@@ -138,7 +138,7 @@ void SysTick_Handler(void)
 
 	// blink
 	GPIO_WriteBit(GPIOB, GPIO_Pin_13,
-		(BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_13)));
+		(BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, LED_BIT_3)));
 }
 
 void USART2_IRQHandler(void)

@@ -100,7 +100,7 @@ int main(void)
 		mpl115a2_read_pressure(); 
 
 		// read temp values from 6 sensors and save to temp_measurements array 
-		ds18b20_read_temps(); 
+//		ds18b20_read_temps(); 
 
 #endif 
  
@@ -168,7 +168,7 @@ void GPIO_Configuration(void)
 	/* GPIO for LEDs */ 
  
 	//LEDs 
-	GPIO_InitStructure.GPIO_Pin = LED_BIT_1 | LED_BIT_2 | LED_BIT_3 | LED_BIT_4; 
+	GPIO_InitStructure.GPIO_Pin = LED_BIT_1 | LED_BIT_2 | LED_BIT_3 | LED_BIT_4 | LED_BIT_5; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(LEDS_PORT, &GPIO_InitStructure);  
@@ -323,7 +323,7 @@ void RCC_Configuration(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); 
  
 	/* I2C clock enable */	 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE); 
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
 #endif 
 
 #ifdef PILOT 
