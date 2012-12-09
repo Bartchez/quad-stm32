@@ -7,14 +7,12 @@
 #include "core_cm3.h" 
  
 // Own libraries 
+#include "sd.h"
 #include "gps.h" 
 #include "rfm12.h" 
 #include "18B20.h" 
 #include "MPL115A2.h" 
 #include "rfm12_controller.h" 
-
-#include "./../../Libraries/FATFs/src/ff.h"
-#include "./../../Libraries/FATFs/src/diskio.h"
  
 /* Private typedef -----------------------------------------------------------*/ 
 /* Private define ------------------------------------------------------------*/ 
@@ -30,6 +28,7 @@ void EXTI_Configuration(void);
 void USART_Configuration(void); 
 void SysTick_Configuration(void); 
 void I2C_Configuration(void); 
+void ADC_Configuration(void); 
  
 /* Private functions ---------------------------------------------------------*/ 
 void Delay(__IO uint32_t nCount); 
@@ -40,6 +39,7 @@ int main(void)
 	uint8_t ret = 0; 
 	 
 	char test[120]; 
+	unsigned char wartoscADC1VTekst[7] = "text\0";
  
 	/* NVIC Configuration */ 
 	NVIC_Configuration(); 
@@ -64,7 +64,10 @@ int main(void)
  
 	/* I2C Configuration */ 
 	I2C_Configuration(); 
- 
+
+	/* ADC Configuration */ 
+	ADC_Configuration();
+
 	/* SysTick Configuration */ 
 	SysTick_Configuration(); 
  
@@ -102,6 +105,11 @@ int main(void)
 		// read temp values from 6 sensors and save to temp_measurements array 
 //		ds18b20_read_temps(); 
 
+
+#endif 
+
+#ifdef PILOT		  
+		sd_write_line("dane.txt", wartoscADC1VTekst, 6, 1);
 #endif 
  
 #ifdef PILOT		 
@@ -168,7 +176,7 @@ void GPIO_Configuration(void)
 	/* GPIO for LEDs */ 
  
 	//LEDs 
-	GPIO_InitStructure.GPIO_Pin = LED_BIT_1 | LED_BIT_2 | LED_BIT_3 | LED_BIT_4 | LED_BIT_5; 
+	GPIO_InitStructure.GPIO_Pin = LED_BIT_1 | LED_BIT_2 | LED_BIT_3 | LED_BIT_4 | LED_BIT_5 | LED_BIT_6; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(LEDS_PORT, &GPIO_InitStructure);  
@@ -319,8 +327,8 @@ void RCC_Configuration(void)
 	/* USART2 clock enable */ 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  
  
-	/* TIM4 clock enable */	 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); 
+	/* TIM3 clock enable */	 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
  
 	/* I2C clock enable */	 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
@@ -510,21 +518,21 @@ void TIM_Configuration(void)
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
  
-	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure); 
+	TIM_TimeBaseInit(PWM_TIMER, &TIM_TimeBaseStructure); 
  
 	/* PWM1 Mode configuration: Channel3 */ 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
 	TIM_OCInitStructure.TIM_Pulse = 720ul;	// 1440 / 720 = 50% 
 	TIM_OCInitStructure.TIM_OCPolarity=TIM_OCPolarity_High; 
-	TIM_OC3Init(TIM4, &TIM_OCInitStructure); 
+	TIM_OC3Init(PWM_TIMER, &TIM_OCInitStructure); 
  
-	TIM_OC3PreloadConfig(TIM4, TIM_OCPreload_Enable);//wlaczenie buforowania 
+	TIM_OC3PreloadConfig(PWM_TIMER, TIM_OCPreload_Enable);//wlaczenie buforowania 
    
-	TIM_ARRPreloadConfig(TIM4, ENABLE);//wlaczenie buforowania  
+	TIM_ARRPreloadConfig(PWM_TIMER, ENABLE);//wlaczenie buforowania  
   	 
 	/* TIM3 enable counter */ 
-	TIM_Cmd(TIM4, ENABLE);   
+	TIM_Cmd(PWM_TIMER, ENABLE);   
 #endif 
 } 
  
@@ -551,6 +559,54 @@ void I2C_Configuration(void)
 #endif 				  
 } 
  
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+void ADC_Configuration(void) {
+#ifdef QUAD 
+	RCC->APB2ENR |= ( 1UL <<  2);           /* enable periperal clock for GPIOA */
+	GPIOA->CRL &= ~0x000000F0;              /* set PIN1 as analog input         */
+
+	#ifndef __ADC_IRQ
+	/* DMA1 Channel1 configuration ---------------------------------------------*/
+	RCC->AHBENR |= ( 1UL <<  0);            /* enable periperal clock for DMA   */
+
+	DMA1_Channel1->CMAR  = (uint32_t)&AD_last;    /* set chn1 memory address    */
+	DMA1_Channel1->CPAR  = (uint32_t)&(ADC1->DR); /* set chn1 peripheral address*/
+	DMA1_Channel1->CNDTR = 1;               /* transmit 1 word                  */
+	DMA1_Channel1->CCR   = 0x00002522;      /* configure DMA channel            */
+	NVIC_EnableIRQ(DMA1_Channel1_IRQn);     /* enable DMA1 Channel1 Interrupt   */
+	DMA1_Channel1->CCR  |= (1 << 0);        /* DMA Channel 1 enable             */
+	#endif
+
+	/* Setup and initialize ADC converter                                       */
+	RCC->CFGR    |= ( 3UL << 14);           /* ADC clk = PCLK2 / 8              */
+
+	RCC->APB2ENR |= ( 1UL <<  9);           /* enable periperal clock for ADC1  */
+
+	ADC1->SQR1    =  0;                     /* Regular chn. Sequence length = 1 */
+	ADC1->SQR2    =  0;                     /* Clear register                   */
+	ADC1->SQR3    = ( 1UL <<  0);           /* 1. conversion = channel 1        */
+	ADC1->SMPR2   = ( 5UL <<  3);           /* sample time channel 1  55,5 cyc. */
+	ADC1->CR1     = ( 1UL <<  8);           /* Scan mode on                     */
+	ADC1->CR2     = ( 7UL << 17)|           /* select SWSTART                   */
+                  ( 1UL << 20) ;          /* enable external Trigger          */
+
+	#ifndef __ADC_IRQ
+	ADC1->CR2    |= ( 1UL <<  8);           /* DMA mode enable                  */
+	#else
+	ADC1->CR1    |= ( 1UL <<  5);           /* enable for EOC Interrupt         */
+	NVIC_EnableIRQ(ADC1_2_IRQn);            /* enable ADC Interrupt             */
+	#endif
+
+	ADC1->CR2    |= ( 1UL <<  0);           /* ADC enable                       */
+
+	ADC1->CR2    |=  1 <<  3;               /* Initialize calibration registers */
+	while (ADC1->CR2 & (1 << 3));           /* Wait for init to finish          */
+	ADC1->CR2    |=  1 <<  2;               /* Start calibration                */
+	while (ADC1->CR2 & (1 << 2));           /* Wait for calibration to finish   */
+#endif
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void SysTick_Configuration(void)  
 { 
@@ -595,3 +651,65 @@ void Delay(__IO uint32_t nCount)
 { 
 	for(; nCount != 0; nCount--); 
 } 
+
+/*----------------------------------------------------------------------------
+  start AD Conversion
+ *----------------------------------------------------------------------------*/
+void ADC_StartCnv (void) {
+
+  ADC1->CR2    |=  (1UL << 22);           /* Start A/D conversion             */ 
+}
+
+
+/*----------------------------------------------------------------------------
+  stop AD Conversion
+ *----------------------------------------------------------------------------*/
+void ADC_StopCnv (void) {
+
+  ADC1->CR2    &= ~(1UL << 22);           /* Stop  A/D conversion             */ 
+}
+
+
+/*----------------------------------------------------------------------------
+  get converted AD value
+ *----------------------------------------------------------------------------*/
+uint16_t ADC_GetCnv (void) {
+
+  while (!(AD_done));                     /* Wait for Conversion end          */
+  AD_done = 0;
+
+  return(AD_last);
+}
+
+
+#ifndef __ADC_IRQ
+/*----------------------------------------------------------------------------
+  DMA IRQ: Executed when a transfer is completet
+ *----------------------------------------------------------------------------*/
+void DMA1_Channel1_IRQHandler(void) {
+
+  if (DMA1->ISR & (1 << 1)) {            /* TCIF interrupt?                   */
+    AD_done = 1;
+
+    DMA1->IFCR  = (1 << 1);              /* clear TCIF interrupt              */
+  }
+}
+#endif
+
+
+#ifdef __ADC_IRQ
+/*----------------------------------------------------------------------------
+  A/D IRQ: Executed when A/D Conversion is done
+ *----------------------------------------------------------------------------*/
+void ADC1_2_IRQHandler(void) {
+
+  if (ADC1->SR & (1 << 1)) {            /* ADC1 EOC interrupt?                */
+    AD_last = ADC1->DR;
+    AD_done = 1;
+
+    ADC1->SR &= ~(1 << 1);              /* clear EOC interrupt                */
+  }
+
+}
+#endif
+
