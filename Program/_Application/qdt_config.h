@@ -3,8 +3,8 @@
 #include <stm32f10x.h>
 
 // define QUAD or PILOT
-//#define QUAD
-#define PILOT
+#define QUAD
+//#define PILOT
 
 
 /***
@@ -130,31 +130,25 @@
 
 /*********************** ADC - BATTERY VOLTAGE (HW) *************************/	  
 //#ifdef QUAD 
-
-	// ADC - port 
-	#define ADC_BATTERY_VOLTAGE_PORT			GPIOC 
  
-	// ADC pins (BATTERY 1) 
-	#define ADC_BATTERY_VOLTAGE_1_CELL_1		GPIO_Pin_0 
-	#define ADC_BATTERY_VOLTAGE_1_CELL_2	 	GPIO_Pin_1 
-	#define ADC_BATTERY_VOLTAGE_1_CELL_3		GPIO_Pin_2
+	// ADC channels (BATTERY 1) 
+	#define ADC_VOLTAGE_1_CELL_1		ADC_Channel_10 
+	#define ADC_VOLTAGE_1_CELL_2	 	ADC_Channel_11 
+	#define ADC_VOLTAGE_1_CELL_3		ADC_Channel_12
 	 
-	// ADC pins (BATTERY 2) 
-	#define ADC_BATTERY_VOLTAGE_2_CELL_1		GPIO_Pin_3 
-	#define ADC_BATTERY_VOLTAGE_2_CELL_2	 	GPIO_Pin_4 
-	#define ADC_BATTERY_VOLTAGE_2_CELL_3		GPIO_Pin_5
+	// ADC channels (BATTERY 2) 
+	#define ADC_VOLTAGE_2_CELL_1		ADC_Channel_13 
+	#define ADC_VOLTAGE_2_CELL_2	 	ADC_Channel_14 
+	#define ADC_VOLTAGE_2_CELL_3		ADC_Channel_15
  
 //#endif 
 
 
 /*********************** ADC - BATTERY CURRENT (HW) *************************/	  
 //#ifdef QUAD 
-
-	// ADC - port 
-	#define ADC_BATTERY_CURRENT_PORT	GPIOB 
  
-	// ADC pins (BATTERY 1 and 2) 
-	#define ADC_BATTERY_CURRENT_1		GPIO_Pin_0 
-	#define ADC_BATTERY_CURRENT_2	 	GPIO_Pin_1 
+	// ADC channels (BATTERY 1 and 2) 
+	#define ADC_CURRENT_1				ADC_Channel_8 
+	#define ADC_CURRENT_2	 			ADC_Channel_9 
  
 //#endif 

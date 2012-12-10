@@ -29,17 +29,24 @@ void USART_Configuration(void);
 void SysTick_Configuration(void); 
 void I2C_Configuration(void); 
 void ADC_Configuration(void); 
+void DMA_Configuration(void); 
  
 /* Private functions ---------------------------------------------------------*/ 
 void Delay(__IO uint32_t nCount); 
+
+// keep ADC measures
+unsigned short int buforADC[8] = {0};
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 int main(void)  
 { 
+
+volatile unsigned long int i;
+	unsigned long int napiecie, temperatura;
+	unsigned char Tekst[7] = {"0\0"};
+
 	uint8_t ret = 0; 
-	 
 	char test[120]; 
-	unsigned char wartoscADC1VTekst[7] = "text\0";
  
 	/* NVIC Configuration */ 
 	NVIC_Configuration(); 
@@ -64,6 +71,9 @@ int main(void)
  
 	/* I2C Configuration */ 
 	I2C_Configuration(); 
+
+	/* DMA Configuration */
+	DMA_Configuration(); 
 
 	/* ADC Configuration */ 
 	ADC_Configuration();
@@ -106,10 +116,23 @@ int main(void)
 //		ds18b20_read_temps(); 
 
 
+	    /*Tu nalezy umiescic glowny kod programu*/
+
+	    napiecie = buforADC[0] * 8059/10000;                                     //przelicz wartosc wyrazona jako calkowita, 12-bit na rzeczywista
+ 	  	sprintf((char *)Tekst, "%d,%03d V\0", napiecie / 1000, napiecie % 1000); //Dzielenie calkowite wyznacza wartosc w V,  dzielenie modulo - czeasc po przecinku
+
+		printf("%s", Tekst);
+
+   		temperatura = (1430 - buforADC[1] * 8059/10000)*10/43+25;                //przelicz wartosc wyrazona jako calkowita, 12-bit na rzeczywista, wartosci typowe wg. Datasheet, 5.3.18, str. 75.
+ 	  	sprintf((char *)Tekst, "%2d C\0", temperatura); 
+
+		printf("%s \n", Tekst);
+
+
 #endif 
 
 #ifdef PILOT		  
-		sd_write_line("dane.txt", wartoscADC1VTekst, 6, 1);
+//		sd_write_line("dane.txt", wartoscADC1VTekst, 6, 1);
 #endif 
  
 #ifdef PILOT		 
@@ -260,6 +283,19 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(TEMPERATURE_PORT, &GPIO_InitStructure);	 
+
+/*
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
+	  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4;   
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;                                   //wejscie analogowe
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
+						*/
 #endif 
 } 
  
@@ -292,11 +328,14 @@ void RCC_Configuration(void)
     	/* PCLK2 = HCLK */ 
 		RCC_PCLK2Config(RCC_HCLK_Div1); 
  
-    	/* PCLK1 = HCLK/4 */ 
+    	/* PCLK1 = HCLK/2 */ 
 		RCC_PCLK1Config(RCC_HCLK_Div2); 
  
-    	/* PLLCLK = 8MHz * 9 = 72 MHz */ 
-		RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9); 
+//    	/* PLLCLK = 8MHz * 9 = 72 MHz */ 
+//		RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9); 
+
+		/* PLLCLK = HSE*7 czyli 8MHz * 7 = 56 MHz */  
+  		RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_7);
  
     	/* Enable PLL */ 
 		RCC_PLLCmd(ENABLE); 
@@ -332,6 +371,16 @@ void RCC_Configuration(void)
  
 	/* I2C clock enable */	 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
+
+	/* ADC1 clock enable */	 
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+
+	/* DMA1 clock enable */	 
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
+	// ADCCLK = PCLK2/4 = 56 MHz /4 = 14 MHz (maksymalna mozliwa)
+    RCC_ADCCLKConfig(RCC_PCLK2_Div4);  
+
 #endif 
 
 #ifdef PILOT 
@@ -558,53 +607,76 @@ void I2C_Configuration(void)
     I2C_AcknowledgeConfig(PRESSURE_I2C, ENABLE); 
 #endif 				  
 } 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+void DMA_Configuration(void) {
+#ifdef QUAD 
+	//konfigurowanie DMA
+
+	#define ADC1_DR_Address 0x4001244C;                                             //adres rejestru ADC1->DR
+  
+	DMA_InitTypeDef DMA_InitStructure;
+  
+	DMA_DeInit(DMA1_Channel1);                                                      //Usun ewentualna poprzednia konfiguracje DMA
+  
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (unsigned long int)ADC1_DR_Address;  //Adres docelowy transferu
+	DMA_InitStructure.DMA_MemoryBaseAddr = (unsigned long int)&buforADC;            //Adres poczatku bloku do przeslania
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;                              //Kierunek transferu
+	DMA_InitStructure.DMA_BufferSize = 2;                                           //Liczba elementow do przeslania (dlugosc bufora)
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;                //Wylaczenie automatycznego zwiekszania adresu po stronie ADC
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;                         //Wlaczenie automatycznego zwiekszania adresu po stronie pamieci (bufora)
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;     //Rozmiar pojedynczych przesylanych danych po stronie ADC (HalfWord = 16bit)
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;             //Rozmiar pojedynczych przesylanych danych po stronie pamieci (bufora)
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;                                 //Tryb dzialania kontrolera DMA - powtarzanie cykliczne
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;                             //Priorytet DMA - wysoki
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;                                    //Wylaczenie obslugi transferu z pamieci do pamieci
+	DMA_Init(DMA1_Channel1, &DMA_InitStructure);                                    //Zapis konfiguracji
+
+	//Wlacz DMA, kanal 1
+	DMA_Cmd(DMA1_Channel1, ENABLE);  
+#endif
+}
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void ADC_Configuration(void) {
 #ifdef QUAD 
-	RCC->APB2ENR |= ( 1UL <<  2);           /* enable periperal clock for GPIOA */
-	GPIOA->CRL &= ~0x000000F0;              /* set PIN1 as analog input         */
+	//konfigurowanie przetwornika AC
+	ADC_InitTypeDef ADC_InitStructure;
+	  
+	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;                 			 		//Jeden przetwornik, praca niezalezna
+	ADC_InitStructure.ADC_ScanConvMode = ENABLE;                        				//Pomiar dwoch kanalow, konieczne skanowanie kanalow 
+  	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;                					//Pomiar w trybie ciaglym
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;					//Brak wyzwalania zewnetrznego
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;            					//Wyrownanie danych do prawej - 12 mlodszych bitow znaczacych
+	ADC_InitStructure.ADC_NbrOfChannel = 8; 	                          				//Liczba uzywanych kanalow =2
+	ADC_Init(ADC1, &ADC_InitStructure);                                 				//Incjalizacja przetwornika
 
-	#ifndef __ADC_IRQ
-	/* DMA1 Channel1 configuration ---------------------------------------------*/
-	RCC->AHBENR |= ( 1UL <<  0);            /* enable periperal clock for DMA   */
+	// Voltage - Battery 1 
+	ADC_RegularChannelConfig(ADC1, ADC_VOLTAGE_1_CELL_1, 1, ADC_SampleTime_1Cycles5); 
+  	ADC_RegularChannelConfig(ADC1, ADC_VOLTAGE_1_CELL_2, 2, ADC_SampleTime_1Cycles5); 
+	ADC_RegularChannelConfig(ADC1, ADC_VOLTAGE_1_CELL_3, 1, ADC_SampleTime_1Cycles5); 
 
-	DMA1_Channel1->CMAR  = (uint32_t)&AD_last;    /* set chn1 memory address    */
-	DMA1_Channel1->CPAR  = (uint32_t)&(ADC1->DR); /* set chn1 peripheral address*/
-	DMA1_Channel1->CNDTR = 1;               /* transmit 1 word                  */
-	DMA1_Channel1->CCR   = 0x00002522;      /* configure DMA channel            */
-	NVIC_EnableIRQ(DMA1_Channel1_IRQn);     /* enable DMA1 Channel1 Interrupt   */
-	DMA1_Channel1->CCR  |= (1 << 0);        /* DMA Channel 1 enable             */
-	#endif
+	// Voltage - Battery 2 
+  	ADC_RegularChannelConfig(ADC1, ADC_VOLTAGE_2_CELL_1, 2, ADC_SampleTime_1Cycles5); 
+	ADC_RegularChannelConfig(ADC1, ADC_VOLTAGE_2_CELL_2, 1, ADC_SampleTime_1Cycles5); 
+  	ADC_RegularChannelConfig(ADC1, ADC_VOLTAGE_2_CELL_3, 2, ADC_SampleTime_1Cycles5); 
+	
+	// Battery current (battery 1&2)
+	ADC_RegularChannelConfig(ADC1, ADC_CURRENT_1, 1, ADC_SampleTime_1Cycles5); 
+  	ADC_RegularChannelConfig(ADC1, ADC_CURRENT_2, 2, ADC_SampleTime_1Cycles5); 
 
-	/* Setup and initialize ADC converter                                       */
-	RCC->CFGR    |= ( 3UL << 14);           /* ADC clk = PCLK2 / 8              */
+  	ADC_DMACmd(ADC1,ENABLE);                                            				//Wlaczenie DMA dla ADC1
+  	ADC_Cmd(ADC1, ENABLE);						         	            				//Wlacz ADC1
 
-	RCC->APB2ENR |= ( 1UL <<  9);           /* enable periperal clock for ADC1  */
+	ADC_ResetCalibration(ADC1);	                                        				//Reset rejestrow kalibracyjnych ADC1
+	while(ADC_GetResetCalibrationStatus(ADC1));	                        				//Odczekanie na wykonanie resetu
 
-	ADC1->SQR1    =  0;                     /* Regular chn. Sequence length = 1 */
-	ADC1->SQR2    =  0;                     /* Clear register                   */
-	ADC1->SQR3    = ( 1UL <<  0);           /* 1. conversion = channel 1        */
-	ADC1->SMPR2   = ( 5UL <<  3);           /* sample time channel 1  55,5 cyc. */
-	ADC1->CR1     = ( 1UL <<  8);           /* Scan mode on                     */
-	ADC1->CR2     = ( 7UL << 17)|           /* select SWSTART                   */
-                  ( 1UL << 20) ;          /* enable external Trigger          */
+	ADC_StartCalibration(ADC1);	                                        				//Kalibracja ADC1
+	while(ADC_GetCalibrationStatus(ADC1));    	                        				//Odczekanie na zakonczenie kalibracji ADC1
 
-	#ifndef __ADC_IRQ
-	ADC1->CR2    |= ( 1UL <<  8);           /* DMA mode enable                  */
-	#else
-	ADC1->CR1    |= ( 1UL <<  5);           /* enable for EOC Interrupt         */
-	NVIC_EnableIRQ(ADC1_2_IRQn);            /* enable ADC Interrupt             */
-	#endif
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);                             				//rozpocznij przetwarzanie AC
 
-	ADC1->CR2    |= ( 1UL <<  0);           /* ADC enable                       */
-
-	ADC1->CR2    |=  1 <<  3;               /* Initialize calibration registers */
-	while (ADC1->CR2 & (1 << 3));           /* Wait for init to finish          */
-	ADC1->CR2    |=  1 <<  2;               /* Start calibration                */
-	while (ADC1->CR2 & (1 << 2));           /* Wait for calibration to finish   */
 #endif
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -651,65 +723,3 @@ void Delay(__IO uint32_t nCount)
 { 
 	for(; nCount != 0; nCount--); 
 } 
-
-/*----------------------------------------------------------------------------
-  start AD Conversion
- *----------------------------------------------------------------------------*/
-void ADC_StartCnv (void) {
-
-  ADC1->CR2    |=  (1UL << 22);           /* Start A/D conversion             */ 
-}
-
-
-/*----------------------------------------------------------------------------
-  stop AD Conversion
- *----------------------------------------------------------------------------*/
-void ADC_StopCnv (void) {
-
-  ADC1->CR2    &= ~(1UL << 22);           /* Stop  A/D conversion             */ 
-}
-
-
-/*----------------------------------------------------------------------------
-  get converted AD value
- *----------------------------------------------------------------------------*/
-uint16_t ADC_GetCnv (void) {
-
-  while (!(AD_done));                     /* Wait for Conversion end          */
-  AD_done = 0;
-
-  return(AD_last);
-}
-
-
-#ifndef __ADC_IRQ
-/*----------------------------------------------------------------------------
-  DMA IRQ: Executed when a transfer is completet
- *----------------------------------------------------------------------------*/
-void DMA1_Channel1_IRQHandler(void) {
-
-  if (DMA1->ISR & (1 << 1)) {            /* TCIF interrupt?                   */
-    AD_done = 1;
-
-    DMA1->IFCR  = (1 << 1);              /* clear TCIF interrupt              */
-  }
-}
-#endif
-
-
-#ifdef __ADC_IRQ
-/*----------------------------------------------------------------------------
-  A/D IRQ: Executed when A/D Conversion is done
- *----------------------------------------------------------------------------*/
-void ADC1_2_IRQHandler(void) {
-
-  if (ADC1->SR & (1 << 1)) {            /* ADC1 EOC interrupt?                */
-    AD_last = ADC1->DR;
-    AD_done = 1;
-
-    ADC1->SR &= ~(1 << 1);              /* clear EOC interrupt                */
-  }
-
-}
-#endif
-
