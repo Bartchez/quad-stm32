@@ -47,6 +47,7 @@ volatile unsigned long int i;
 
 	uint8_t ret = 0; 
 	char test[120]; 
+	unsigned char wartoscADC1VTekst[7] = "text\0";
  
 	/* NVIC Configuration */ 
 	NVIC_Configuration(); 
@@ -107,28 +108,24 @@ volatile unsigned long int i;
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
     	Delay(0x5FFFF); 
  
-#ifdef QUAD		  
+#ifdef QUAD
 
 		// read pressure values sensor and save to mpl115a2_pressure ivar 
 		mpl115a2_read_pressure(); 
 
 		// read temp values from 6 sensors and save to temp_measurements array 
-//		ds18b20_read_temps(); 
+		ds18b20_read_temps();
 
-
-	    /*Tu nalezy umiescic glowny kod programu*/
-
+		/*
+	    // Tu nalezy umiescic glowny kod programu
 	    napiecie = buforADC[0] * 8059/10000;                                     //przelicz wartosc wyrazona jako calkowita, 12-bit na rzeczywista
  	  	sprintf((char *)Tekst, "%d,%03d V\0", napiecie / 1000, napiecie % 1000); //Dzielenie calkowite wyznacza wartosc w V,  dzielenie modulo - czeasc po przecinku
-
 		printf("%s", Tekst);
-
    		temperatura = (1430 - buforADC[1] * 8059/10000)*10/43+25;                //przelicz wartosc wyrazona jako calkowita, 12-bit na rzeczywista, wartosci typowe wg. Datasheet, 5.3.18, str. 75.
  	  	sprintf((char *)Tekst, "%2d C\0", temperatura); 
-
 		printf("%s \n", Tekst);
-
-
+		*/
+		
 #endif 
 
 #ifdef PILOT		  
@@ -606,6 +603,7 @@ void I2C_Configuration(void)
  
     I2C_AcknowledgeConfig(PRESSURE_I2C, ENABLE); 
 #endif 				  
+
 } 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -636,7 +634,7 @@ void DMA_Configuration(void) {
 	DMA_Cmd(DMA1_Channel1, ENABLE);  
 #endif
 }
- 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void ADC_Configuration(void) {
 #ifdef QUAD 
@@ -722,4 +720,4 @@ void SysTick_Configuration(void)
 void Delay(__IO uint32_t nCount) 
 { 
 	for(; nCount != 0; nCount--); 
-} 
+}
