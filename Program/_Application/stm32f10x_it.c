@@ -129,16 +129,24 @@ void PendSV_Handler(void)
 #include "gps.h"
 #include "rfm12.h"
 #include "rfm12_controller.h"
+#include "./../../Libraries/FATFs/src/diskio.h"
 
 void SysTick_Handler(void)
 {
-	
+#ifdef QUAD	
 	// send next value
 	rf12_controller_send();
 
 	// blink
 	GPIO_WriteBit(GPIOB, GPIO_Pin_13,
 		(BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, LED_BIT_3)));
+#endif
+
+#ifdef PILOT	
+  	
+	// karta SD
+	disk_timerproc();
+#endif
 }
 
 void USART2_IRQHandler(void)

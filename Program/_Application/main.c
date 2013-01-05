@@ -41,7 +41,7 @@ unsigned short int buforADC[8] = {0};
 int main(void)  
 { 
 
-volatile unsigned long int i;
+	volatile unsigned long int i;
 	unsigned long int napiecie, temperatura;
 	unsigned char Tekst[7] = {"0\0"};
 
@@ -90,14 +90,14 @@ volatile unsigned long int i;
  
 	/* Init send/recive rfm12 controller */ 
 	rf12_controller_init(); 
- 
-	/* Init send/recive rfm12 controller */ 
-	rf12_controller_init(); 
- 
+  
+	/* Init SD card */
+	sd_init();
+	
 	// odcekaj po konfuguracji rfm12 
 	Delay(0x0fffff); 
  
-	while (1)  
+	while (1)  					   
 	{		  
  
 		// blink LED 
@@ -129,9 +129,9 @@ volatile unsigned long int i;
 #endif 
 
 #ifdef PILOT		  
-//		sd_write_line("dane.txt", wartoscADC1VTekst, 6, 1);
+		sd_write_line("date.txt", "test 12345", 10, 1);
 #endif 
- 
+
 #ifdef PILOT		 
  
 		if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart(); 
@@ -156,7 +156,6 @@ volatile unsigned long int i;
 			} 
 		} 
 #endif 
- 
 	}; 
 } 
  
@@ -245,6 +244,12 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(SD_PORT_SPI, &GPIO_InitStructure);
+
+	//SD - DETECT
+    GPIO_InitStructure.GPIO_Pin = SD_BIT_DETECT;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(SD_PORT_DETECT, &GPIO_InitStructure);
 
 #endif 
  
@@ -466,7 +471,7 @@ void SPI_Configuration(void) {
 	SPI_InitTypeDef SPI_InitStructure;  
  
 	/* SPI for rfm12 */ 
- 
+
 	// Konfiguracja SPI1 
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex; 
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master; 
@@ -680,11 +685,15 @@ void ADC_Configuration(void) {
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void SysTick_Configuration(void)  
 { 
-#ifdef QUAD 
- 
+
 	unsigned long int Settings; 
 	unsigned long int SysTick_CLKSource = SysTick_CLKSource_HCLK_Div8; 
-	unsigned long int Ticks = 9000000ul; 
+#ifdef QUAD 
+	unsigned long int Ticks = 9000000ul; // 1sek
+#else
+	unsigned long int Ticks = 90000ul;  // 10ms
+#endif
+ 
  
 	assert_param(IS_SYSTICK_CLK_SOURCE(SysTick_CLKSource)); 
  
@@ -712,7 +721,6 @@ void SysTick_Configuration(void)
  
 	// Zapisz ustawienia do rejestru sterujacego SysTick (i wlacz licznik) 
 	SysTick->CTRL = Settings; 
-#endif 
  
 } 
  

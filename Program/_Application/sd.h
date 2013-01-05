@@ -10,6 +10,13 @@
 #include "./../../Libraries/FATFs/src/ff.h"
 #include "./../../Libraries/FATFs/src/diskio.h"
 
+
+void sd_init(void);
+uint8_t sd_mount(void);
+uint8_t sd_card_detected(void);
+uint8_t sd_open_file(const char* path);
+uint8_t sd_close_file(void);
+
 uint8_t sd_write_line(const char* path, char* text, uint8_t size, uint8_t append);
 
 #endif /*_SD_H*/

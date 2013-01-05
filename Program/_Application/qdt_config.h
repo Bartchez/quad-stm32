@@ -38,19 +38,23 @@
 #define SD_PORT_SS				GPIOC
 #define SD_BIT_SS				GPIO_Pin_2
 
+// SPI - DETECT	 
+#define SD_PORT_DETECT			GPIOC
+#define SD_BIT_DETECT			GPIO_Pin_15
+
 // SPI - DATA
 #define SD_PORT_SPI				GPIOB
 #define SD_BIT_SCK				GPIO_Pin_13
 #define SD_BIT_MISO				GPIO_Pin_14
 #define SD_BIT_MOSI				GPIO_Pin_15  
- 
+
 
 /*********************** LEDs (SW) *************************/	 
 // LEDs port 
 #define LEDS_PORT				GPIOB 
  
 // LEDs pins 
-#define LED_BIT_1				GPIO_Pin_12 
+#define LED_BIT_1				GPIO_Pin_12
 #define LED_BIT_2				GPIO_Pin_11 
 #define LED_BIT_3				GPIO_Pin_10 
 #define LED_BIT_4				GPIO_Pin_8 
