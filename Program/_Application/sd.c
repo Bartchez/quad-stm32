@@ -31,7 +31,7 @@ uint8_t sd_card_detected(void) {
 	return current;
 }
 
-uint8_t sd_mount(void) {
+FRESULT sd_mount(void) {
 
     fresult = f_mount(0, &g_sFatFs);
 
@@ -47,7 +47,7 @@ uint8_t sd_mount(void) {
 	return 0;
 }
 
-uint8_t sd_open_file(const char* path) {
+FRESULT sd_open_file(const char* path) {
 
 	// get card state
 	detected = sd_card_detected();
@@ -73,7 +73,7 @@ uint8_t sd_open_file(const char* path) {
 	return 0;
 }
 
-uint8_t sd_close_file(void) {
+FRESULT sd_close_file(void) {
 	// close file
  	return f_close(&file);
 }

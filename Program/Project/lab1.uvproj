@@ -446,6 +446,16 @@
               <FileType>1</FileType>
               <FilePath>..\_Application\adc.c</FilePath>
             </File>
+            <File>
+              <FileName>lcd_ls020.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\lcd_ls020.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\_Application\utils.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

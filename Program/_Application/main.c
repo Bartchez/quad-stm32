@@ -13,7 +13,10 @@
 #include "18B20.h" 
 #include "MPL115A2.h" 
 #include "rfm12_controller.h" 
-//#include "lcd_ls020.h"
+
+#ifdef PILOT
+#include "lcd_ls020.h"
+#endif
  
 /* Private typedef -----------------------------------------------------------*/ 
 /* Private define ------------------------------------------------------------*/ 
@@ -88,15 +91,23 @@ int main(void)
  
 	/* Init rfm12 module */ 
 	rf12_init();   
- 
+
+#ifdef QUAD
+
+	/* Init SD card */
+	sd_init();
+
+	/* Init LCD */
+    S65_init();
+
+#else
 	/* Init GPS sensor */ 
 	gps_init(); 
  
 	/* Init send/recive rfm12 controller */ 
 	rf12_controller_init(); 
-  
-	/* Init SD card */
-	sd_init();
+
+#endif
 	
 	// odcekaj po konfuguracji rfm12 
 	Delay_ms(1000); 
@@ -133,7 +144,14 @@ int main(void)
 #endif 
 
 #ifdef PILOT		  
-		sd_write_line("date.txt", "test 12345", 10, 1);
+		LS020_fill_screen(GREEN);
+  		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
+		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
+		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
+		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
+		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
+
+//		sd_write_line("date.txt", "test 12345", 10, 1);
 #endif 
 
 #ifdef PILOT		 
@@ -462,7 +480,6 @@ void NVIC_Configuration(void)
   	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
   	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   	NVIC_Init(&NVIC_InitStructure);
-
 
  
 	/* NVIC for GPS */ 

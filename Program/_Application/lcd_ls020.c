@@ -397,64 +397,6 @@ void LS020_message_centerXY(uint8_t x,uint8_t y, uint16_t textcolor, uint16_t ba
   }
 }
 
-/*******************************************************************************
-* Function Name  : S65_init_GPIO
-* Description    : Configures all the necessary GPIOs for the Display
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-
-void S65_init_GPIO(void)
-{
-  GPIO_InitTypeDef GPIOS65Init;
-  
-  GPIOS65Init.GPIO_Pin   = LCD_PIN_RESET | LCD_PIN_RS | LCD_PIN_CS;
-  GPIOS65Init.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIOS65Init.GPIO_Mode  = GPIO_Mode_Out_PP;
-  GPIO_Init(LCD_PORT_LS020, &GPIOS65Init);
-
-}
-
-/*******************************************************************************
-* Function Name  : S65_init_SPI
-* Description    : Configures the SPI for the S65 Display 
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-
-void S65_init_SPI(void)
-{
-SPI_InitTypeDef SPI_InitStructure;
-GPIO_InitTypeDef GPIO_InitStructure;
-
-  /* SPI2 Periph clock enable */
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-
-//SCK, MISO and MOSI
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-  SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-  SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
-  SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;
-  SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
-  SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
-  SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
-  SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
-  SPI_InitStructure.SPI_CRCPolynomial= 7;
-  SPI_Init(SPI2, &SPI_InitStructure);
-
-  // Wlacz SPI2
-  SPI_Cmd(SPI2, ENABLE);
-
-/* Now you can send Data using SPI_I2S_SendData(SPI2, uint16_t Data)*/
-}
-
 
 /*******************************************************************************
 * Function Name  : S65_send_CMD
