@@ -1,4 +1,4 @@
- 
+ 								   
 /* Includes ------------------------------------------------------------------*/ 
 #include "stm32f10x.h" 
  
@@ -13,11 +13,14 @@
 #include "18B20.h" 
 #include "MPL115A2.h" 
 #include "rfm12_controller.h" 
+//#include "lcd_ls020.h"
  
 /* Private typedef -----------------------------------------------------------*/ 
 /* Private define ------------------------------------------------------------*/ 
 /* Private macro -------------------------------------------------------------*/ 
 /* Private variables ---------------------------------------------------------*/ 
+static vu32 TimingDelay = 0;
+
 /* Private function prototypes -----------------------------------------------*/ 
 void RCC_Configuration(void); 
 void TIM_Configuration(void); 
@@ -32,7 +35,8 @@ void ADC_Configuration(void);
 void DMA_Configuration(void); 
  
 /* Private functions ---------------------------------------------------------*/ 
-void Delay(__IO uint32_t nCount); 
+void Delay_ms(u32 nCount);
+void TimingDelay_Decrement(void);
 
 // keep ADC measures
 unsigned short int buforADC[8] = {0};
@@ -42,12 +46,12 @@ int main(void)
 { 
 
 	volatile unsigned long int i;
-	unsigned long int napiecie, temperatura;
-	unsigned char Tekst[7] = {"0\0"};
+//	unsigned long int napiecie, temperatura;
+//	unsigned char Tekst[7] = {"0\0"};
 
 	uint8_t ret = 0; 
 	char test[120]; 
-	unsigned char wartoscADC1VTekst[7] = "text\0";
+//	unsigned char wartoscADC1VTekst[7] = "text\0";
  
 	/* NVIC Configuration */ 
 	NVIC_Configuration(); 
@@ -95,7 +99,7 @@ int main(void)
 	sd_init();
 	
 	// odcekaj po konfuguracji rfm12 
-	Delay(0x0fffff); 
+	Delay_ms(1000); 
  
 	while (1)  					   
 	{		  
@@ -103,10 +107,10 @@ int main(void)
 		// blink LED 
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
     	GPIO_SetBits(LEDS_PORT, LED_BIT_2);   //LED9 OFF 
-    	Delay(0x5FFFF); 
+		Delay_ms(1000); 
 		GPIO_SetBits(LEDS_PORT, LED_BIT_1);   //LED9 ON 
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
-    	Delay(0x5FFFF); 
+		Delay_ms(1000); 
  
 #ifdef QUAD
 
@@ -251,6 +255,27 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(SD_PORT_DETECT, &GPIO_InitStructure);
 
+
+	/* GPIO for LCD */ 
+ 
+    // SD - CS 
+    GPIO_InitStructure.GPIO_Pin = LCD_BIT_SS;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(LCD_PORT_SS, &GPIO_InitStructure);
+
+    //SD - SCK, MISO, MOSI
+    GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MISO | LCD_BIT_MOSI;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
+
+	// RS & RESET
+    GPIO_InitStructure.GPIO_Pin   = LCD_PIN_RESET | LCD_PIN_RS;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_Init(LCD_PORT_LS020, &GPIO_InitStructure);
+
 #endif 
  
  
@@ -363,6 +388,9 @@ void RCC_Configuration(void)
  
 	/* USART1 clock enable */ 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);  
+
+	/* TIM1 clock enable */	 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); 
  
 #ifdef QUAD 
 	/* USART2 clock enable */ 
@@ -423,6 +451,19 @@ void NVIC_Configuration(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; 
 	NVIC_Init(&NVIC_InitStructure); 
  
+
+	/* NVIC for TIM1 */ 
+
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1); 
+
+  	//przerwanie UP (przepelnienie) timera1
+    NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
+  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+  	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  	NVIC_Init(&NVIC_InitStructure);
+
+
  
 	/* NVIC for GPS */ 
  
@@ -437,6 +478,7 @@ void NVIC_Configuration(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;  
 	NVIC_Init(&NVIC_InitStructure);  
 #endif 
+
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -501,6 +543,23 @@ void SPI_Configuration(void) {
     SPI_InitStructure.SPI_CRCPolynomial = 7;
     SPI_Init(SD_SPI, &SPI_InitStructure);   
     SPI_Cmd(SD_SPI, ENABLE);
+
+
+	/* SPI for LCD */ 
+
+	// Konfiguracja SPI2
+    SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+    SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;
+    SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+    SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    SPI_InitStructure.SPI_CRCPolynomial= 7;
+    SPI_Init(LCD_SPI, &SPI_InitStructure);
+    SPI_Cmd(LCD_SPI, ENABLE);
+
 #endif
 } 
  
@@ -556,21 +615,43 @@ void USART_Configuration(void) {
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void TIM_Configuration(void)  
 { 
- 
-#ifdef PILOT 
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure; 
 	TIM_OCInitTypeDef  TIM_OCInitStructure; 
-	 
-	/* TIM configuration for PWN (needed by LCD) */ 
+ 
+	/* TIM1 configuration */ 
+ 
+	/* Time base configuration */ 
+	TIM_TimeBaseStructure.TIM_Prescaler = 56000-1;          
+
+#ifdef PILOT	
+	TIM_TimeBaseStructure.TIM_Period = 10;		// 10ms
+#else
+	TIM_TimeBaseStructure.TIM_Period = 1000;	// 1sek.
+#endif
+
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
+ 
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure); 
+	
+	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);	
+
+	/* TIM1 enable counter */ 
+	TIM_Cmd(TIM1, ENABLE);   
+
+#ifdef PILOT 
+
+	/* TIM configuration for PWM (needed by LCD) */ 
  
 	/* Time base configuration */ 
 	TIM_TimeBaseStructure.TIM_Prescaler = 0;          
-	TIM_TimeBaseStructure.TIM_Period = 1439ul;	// PWM = 50kHz Hz 
+	TIM_TimeBaseStructure.TIM_Period = 1439ul;	// PWM = 50kHz
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
  
 	TIM_TimeBaseInit(PWM_TIMER, &TIM_TimeBaseStructure); 
- 
+
+
 	/* PWM1 Mode configuration: Channel3 */ 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
@@ -687,13 +768,8 @@ void SysTick_Configuration(void)
 { 
 
 	unsigned long int Settings; 
-	unsigned long int SysTick_CLKSource = SysTick_CLKSource_HCLK_Div8; 
-#ifdef QUAD 
-	unsigned long int Ticks = 9000000ul; // 1sek
-#else
-	unsigned long int Ticks = 90000ul;  // 10ms
-#endif
- 
+	unsigned long int SysTick_CLKSource = SysTick_CLKSource_HCLK; 
+	unsigned long int Ticks = 72000ul;  // 1ms 
  
 	assert_param(IS_SYSTICK_CLK_SOURCE(SysTick_CLKSource)); 
  
@@ -725,7 +801,29 @@ void SysTick_Configuration(void)
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
-void Delay(__IO uint32_t nCount) 
-{ 
-	for(; nCount != 0; nCount--); 
+void Delay_ms(u32 nCount)
+{
+  TimingDelay = nCount;
+
+  /* Enable the SysTick Counter */
+  SysTick->CTRL |= ((u32)0x00000001);
+  
+  while(TimingDelay != 0)
+  {
+  }
+
+  /* Disable the SysTick Counter */
+  SysTick->CTRL |= ((u32)0xFFFFFFFE);
+
+  /* Clear the SysTick Counter */
+  SysTick->VAL |= ((u32)0x00000000);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+void TimingDelay_Decrement(void)
+{
+  if (TimingDelay != 0x00)
+  { 
+    TimingDelay--;
+  }
 }

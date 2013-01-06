@@ -49,6 +49,28 @@
 #define SD_BIT_MOSI				GPIO_Pin_15  
 
 
+/*********************** SPI - LCD (HW) **************************/	 
+// SPI interface	 
+#define LCD_SPI					SPI2
+
+// SPI - CS	 
+#define LCD_PORT_SS				GPIOC
+#define LCD_BIT_SS				GPIO_Pin_14
+
+// SPI - DATA
+#define LCD_PORT_SPI			GPIOB
+#define LCD_BIT_SCK				GPIO_Pin_13
+#define LCD_BIT_MISO			GPIO_Pin_14
+#define LCD_BIT_MOSI			GPIO_Pin_15  
+
+// S65 LCD Config RS PIN
+#define LCD_PORT_LS020 			GPIOC
+#define LCD_PIN_RS  			GPIO_Pin_12
+
+//S65 LCD Config RESET PIN
+#define LCD_PIN_RESET  			GPIO_Pin_13
+
+
 /*********************** LEDs (SW) *************************/	 
 // LEDs port 
 #define LEDS_PORT				GPIOB 

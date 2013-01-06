@@ -133,20 +133,8 @@ void PendSV_Handler(void)
 
 void SysTick_Handler(void)
 {
-#ifdef QUAD	
-	// send next value
-	rf12_controller_send();
-
-	// blink
-	GPIO_WriteBit(GPIOB, GPIO_Pin_13,
-		(BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, LED_BIT_3)));
-#endif
-
-#ifdef PILOT	
-  	
-	// karta SD
-	disk_timerproc();
-#endif
+  /* Decrement the TimingDelay variable */
+  TimingDelay_Decrement();
 }
 
 void USART2_IRQHandler(void)
@@ -176,6 +164,31 @@ void EXTI0_IRQHandler(void)
 			// wyslanie, odebranie bajtu
 			rf12_pool();
 		}
+	}
+}
+
+void TIM1_UP_IRQHandler(void) {
+	
+	// przepelnienie liznika
+	if (TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET) {
+		// czyszczenie flagi przerwania
+		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);	
+
+#ifdef QUAD	
+		// send next value
+		rf12_controller_send();
+
+		// blink
+		GPIO_WriteBit(GPIOB, GPIO_Pin_13,
+			(BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, LED_BIT_3)));
+#endif
+
+#ifdef PILOT	
+  	
+		// karta SD
+		disk_timerproc();
+#endif
+
 	}
 }
 
