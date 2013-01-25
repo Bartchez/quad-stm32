@@ -21,6 +21,8 @@ void rf12_controller_init() {
 	rf12_data_type = rf12_temperature;
 }
 
+#ifdef QUAD
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_controller_send() {
 
@@ -112,3 +114,5 @@ void rf12_controller_send_tension() {
 void rf12_controller_send_current() {
 
 }
+
+#endif

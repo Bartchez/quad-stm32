@@ -139,11 +139,13 @@ void SysTick_Handler(void)
 
 void USART2_IRQHandler(void)
 {
+#ifdef QUAD
 	//obsluga przerwania
 	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
 	{
 		gps_pool();
 	}
+#endif
 }
 
 void EXTI0_IRQHandler(void)
@@ -179,8 +181,8 @@ void TIM1_UP_IRQHandler(void) {
 		rf12_controller_send();
 
 		// blink
-		GPIO_WriteBit(GPIOB, GPIO_Pin_13,
-			(BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, LED_BIT_3)));
+		GPIO_WriteBit(LEDS_PORT, LED_BIT_4,
+			(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_4)));
 #endif
 
 #ifdef PILOT	

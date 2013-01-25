@@ -67,3 +67,4 @@ void BaroGetPressure(float *PreTemp)
 	PreTemp[0] = pcomp * 650 / 1023 + 500;
     PreTemp[1] = (25 + ((tadc - 498.0) / -5.35));
 }
+

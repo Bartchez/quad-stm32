@@ -17,7 +17,8 @@ void ds18b20_read_temps(void) {
 
 	// iterate all sensors and get termerature
 	for (i=0; i<6; ++i) {
-		temp_measurements[i] = ds18b20_read_temp(sensors[i]);
+//		temp_measurements[i] = ds18b20_read_temp(sensors[i]);
+		temp_measurements[i] = ds18b20_read_temp(TEMPERATURE_BIT_6);
 	}
 	
 	// create output string
@@ -79,6 +80,7 @@ void delay_us(u16 us)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 uint8_t onewire_reset(uint16_t pin) 
 {
+	uint16_t d = 7200;
 	uint8_t presence = 1;
 	Onewire_OUT_PULL_UP(pin);
 	GPIO_ResetBits(TEMPERATURE_PORT, pin);
@@ -88,7 +90,7 @@ uint8_t onewire_reset(uint16_t pin)
 	Onewire_IN_PULL_UP(pin); 
 	delay_us(10);
 	presence = GPIO_ReadInputDataBit(TEMPERATURE_PORT, pin);
-	while(!(GPIO_ReadInputDataBit(TEMPERATURE_PORT, pin)));
+	while (!(GPIO_ReadInputDataBit(TEMPERATURE_PORT, pin)));
 	Onewire_OUT_PULL_UP(pin);
 	GPIO_SetBits(TEMPERATURE_PORT, pin);
 	return presence;
@@ -143,9 +145,6 @@ void onewire_write(uint8_t data, uint16_t pin)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 float ds18b20_read_temp(uint16_t pin) {
 	uint8_t lowByte, highByte;
-	int8_t temperature, fraction;
-	int8_t sign = 1;
-	int16_t tt;
 
 	// Reset
     if (onewire_reset(pin)) return 255;
@@ -161,6 +160,19 @@ float ds18b20_read_temp(uint16_t pin) {
 	onewire_write(SKIPROM, pin);    	
 	// Read Scratch Pad  
 	onewire_write(TEMPCOMMAND, pin);		
+
+	// read LS & MS bytes
+	lowByte = onewire_read(pin); // LS Byte
+	highByte = onewire_read(pin); // MS Byte
+
+	// oblicz i zwroc wyliczona temperature w stopniach celcjusza
+	return perform_conversion(lowByte, highByte, pin);
+}
+
+float perform_conversion(uint8_t lowByte, uint8_t highByte, uint16_t pin) {
+	int8_t temperature, fraction;
+	int8_t sign = 1;
+	int16_t tt;
 
 	// read LS & MS bytes
 	lowByte = onewire_read(pin); // LS Byte

@@ -120,3 +120,4 @@ uint8_t sd_write_line(const char* path, char* text, uint8_t size, uint8_t append
 	// return no error
 	return 0;
 }
+

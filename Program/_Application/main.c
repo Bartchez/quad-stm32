@@ -5,17 +5,21 @@
 // Configurations 
 #include "qdt_config.h" 
 #include "core_cm3.h" 
+
+// Common files
+#include "rfm12_controller.h" 
+#include "rfm12.h" 
  
 // Own libraries 
+//#ifdef PILOT
 #include "sd.h"
+#include "lcd_ls020.h"
+//#endif
+
+#ifdef QUAD
 #include "gps.h" 
-#include "rfm12.h" 
 #include "18B20.h" 
 #include "MPL115A2.h" 
-#include "rfm12_controller.h" 
-
-#ifdef PILOT
-#include "lcd_ls020.h"
 #endif
  
 /* Private typedef -----------------------------------------------------------*/ 
@@ -66,51 +70,51 @@ int main(void)
 	GPIO_Configuration(); 
  
 	/* USART Configuration */ 
-	USART_Configuration(); 
+//	USART_Configuration(); 
  
 	/* SPI Configuration */ 
-	SPI_Configuration(); 
+//	SPI_Configuration(); 
  
 	/* EXTI Configuration */ 
-	EXTI_Configuration(); 
+//	EXTI_Configuration(); 
  
 	/* TIM Configuration */ 
-	TIM_Configuration(); 
+//	TIM_Configuration(); 
  
 	/* I2C Configuration */ 
-	I2C_Configuration(); 
+//	I2C_Configuration(); 
 
 	/* DMA Configuration */
-	DMA_Configuration(); 
+//	DMA_Configuration(); 
 
 	/* ADC Configuration */ 
-	ADC_Configuration();
+//	ADC_Configuration();
 
 	/* SysTick Configuration */ 
 	SysTick_Configuration(); 
  
 	/* Init rfm12 module */ 
-	rf12_init();   
+//	rf12_init();   
 
-#ifdef QUAD
+#ifdef PILOT
 
 	/* Init SD card */
-	sd_init();
+//	sd_init();
 
 	/* Init LCD */
-    S65_init();
+//    S65_init();
 
 #else
 	/* Init GPS sensor */ 
-	gps_init(); 
+//	gps_init(); 
  
 	/* Init send/recive rfm12 controller */ 
-	rf12_controller_init(); 
+//	rf12_controller_init(); 
 
 #endif
 	
 	// odcekaj po konfuguracji rfm12 
-	Delay_ms(1000); 
+	Delay_ms(10); 
  
 	while (1)  					   
 	{		  
@@ -118,15 +122,15 @@ int main(void)
 		// blink LED 
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
     	GPIO_SetBits(LEDS_PORT, LED_BIT_2);   //LED9 OFF 
-		Delay_ms(1000); 
+		Delay_ms(100); 
 		GPIO_SetBits(LEDS_PORT, LED_BIT_1);   //LED9 ON 
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
-		Delay_ms(1000); 
+		Delay_ms(100); 
  
 #ifdef QUAD
 
 		// read pressure values sensor and save to mpl115a2_pressure ivar 
-		mpl115a2_read_pressure(); 
+//		mpl115a2_read_pressure(); 
 
 		// read temp values from 6 sensors and save to temp_measurements array 
 		ds18b20_read_temps();
@@ -283,7 +287,7 @@ void GPIO_Configuration(void)
     GPIO_Init(LCD_PORT_SS, &GPIO_InitStructure);
 
     //SD - SCK, MISO, MOSI
-    GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MISO | LCD_BIT_MOSI;
+    GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MOSI;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
@@ -398,8 +402,13 @@ void RCC_Configuration(void)
 	/* SPI1 clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE); 
  
-	/* GPIO A/B/C clock enable */ 
+#ifdef QUAD 
+	/* GPIO A/B/C/D clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE); 
+#else
+	/* GPIO A/B/C/D/E/G clock enable */ 
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | RCC_APB2Periph_GPIOG, ENABLE); 
+#endif
  
 	/* AFIO clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); 
@@ -633,7 +642,10 @@ void USART_Configuration(void) {
 void TIM_Configuration(void)  
 { 
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure; 
+
+#ifdef PILOT 
 	TIM_OCInitTypeDef  TIM_OCInitStructure; 
+#endif
  
 	/* TIM1 configuration */ 
  
@@ -691,7 +703,7 @@ void I2C_Configuration(void)
    
 #ifdef QUAD 
  
-	I2C_InitTypeDef  I2C_InitStructure; 
+	I2C_InitTypeDef I2C_InitStructure; 
 		 
     I2C_DeInit(PRESSURE_I2C); 
     I2C_InitStructure.I2C_Mode = I2C_Mode_I2C; 

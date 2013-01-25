@@ -10,4 +10,3 @@ unsigned long int napiecie, temperatura;
 void adc(void) {
 
 }
-

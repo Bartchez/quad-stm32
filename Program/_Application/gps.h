@@ -1,8 +1,9 @@
 #ifndef _GPS_H
 #define _GPS_H
 
-#include <stdio.h>
 #include <stm32f10x.h>
+
+#include <stdio.h>
 #include <string.h>
 /*
 	W metodzie USART2_IRQHandler (plik stm32f10x_it.c) znajduje sie obsluga przerwania 
@@ -29,4 +30,5 @@ char* gps_speed(void); // zwraca predkosc w m/s, 5 znkow, najmniej znaczace dwie
 char* gps_direction(void); //zwraca kierunek przemieszczania w stopniach, 5 znaki, najmniej znaczace dwie cyfry sa wartociami dziesietnymi i setnymi predkosci
 
 void gps_pool(void); // obsluga przerwania USART
+
 #endif /*_GPS_H*/

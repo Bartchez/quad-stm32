@@ -30,6 +30,8 @@ extern volatile uint8_t rf12_data_type;
 //! clear data
 void rf12_controller_init(void);
 
+#ifdef QUAD
+
 //! send next data
 void rf12_controller_send(void);
 
@@ -39,5 +41,7 @@ void rf12_controller_send_pressur(void);
 void rf12_controller_send_gps(void);
 void rf12_controller_send_tension(void);
 void rf12_controller_send_current(void);
+
+#endif
 
 #endif 
