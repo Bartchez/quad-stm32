@@ -148,32 +148,8 @@ void USART2_IRQHandler(void)
 #endif
 }
 
-void EXTI0_IRQHandler(void)
-{
-#ifdef PILOT
-	uint16_t status = 0;
-
-	if (EXTI_GetITStatus(EXTI_Line0) != RESET) {
-			
-		// wylaczenie flagi obslugi przerwania
-		EXTI_ClearITPendingBit(EXTI_Line0);
-
-		// pobranie statusu
-		status = rf12_read_status();
-		
-		// interesuje nas najstarszy bit
-		if (status & RFM12_STATUS_RGIT) {		
-
-			// wyslanie, odebranie bajtu
-			rf12_pool();
-		}
-	}
-#endif
-}
-
 void EXTI9_5_IRQHandler(void)
 {
-#ifdef QUAD
 	uint16_t status = 0;
 
 	if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
@@ -191,7 +167,6 @@ void EXTI9_5_IRQHandler(void)
 			rf12_pool();
 		}
 	}
-#endif
 }
 
 void TIM1_UP_IRQHandler(void) {

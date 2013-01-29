@@ -248,7 +248,6 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(PWM_PORT, &GPIO_InitStructure); 
 
-
 	// GPIO for SD
  
     // SD - CS 
@@ -457,14 +456,8 @@ void NVIC_Configuration(void)
 	//Wybor modelu grupowania przerwan 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0); 
 
-#ifdef PILOT 	 
 	//Wybor konfigurowanego IRQ 
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn; 
-#else
-	//Wybor konfigurowanego IRQ 
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn; 
-#endif
-	 
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn; 	 	 
 	//Priorytet grupowy 
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; 
 	//Podpriorytet 
@@ -505,7 +498,6 @@ void NVIC_Configuration(void)
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void EXTI_Configuration(void)  
 { 
- 
 	/* EXTI for rfm12 */ 
 	EXTI_InitTypeDef EXTI_InitStructure; 
 
@@ -517,10 +509,10 @@ void EXTI_Configuration(void)
 	EXTI_InitStructure.EXTI_Line = EXTI_Line9; 
 #else
 	//Ustawienia zrodla przerwania 
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource0); 
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource8); 
 
 	//Wybor lini 
-	EXTI_InitStructure.EXTI_Line = EXTI_Line0; 
+	EXTI_InitStructure.EXTI_Line = EXTI_Line8; 
 #endif
 	 
 	//Ustawienie generowania przerwania 
@@ -544,13 +536,11 @@ void SPI_Configuration(void) {
 	// Konfiguracja SPI 
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex; 
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master; 
-//	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b; 
 	SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b; 
 	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low; 
 	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge; 
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft; 
-//	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32; 
-	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256; 
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32; 
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB; 
 	SPI_InitStructure.SPI_CRCPolynomial = 7; 
 	SPI_Init(RFM12_SPI, &SPI_InitStructure); 
