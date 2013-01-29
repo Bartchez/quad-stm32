@@ -58,10 +58,10 @@ int main(void)
 
 	uint8_t ret = 0; 
 	char test[120]; 
-//	unsigned char wartoscADC1VTekst[7] = "text\0";
+	unsigned char wartoscADC1VTekst[7] = "text\0";
  
 	/* NVIC Configuration */ 
-//	NVIC_Configuration(); 
+	NVIC_Configuration(); 
  
 	/* System Clocks Configuration */ 
 	RCC_Configuration(); 
@@ -70,7 +70,7 @@ int main(void)
 	GPIO_Configuration(); 
  
 	/* USART Configuration */ 
-//	USART_Configuration(); 
+	USART_Configuration(); 
  
 	/* SPI Configuration */ 
 	SPI_Configuration(); 
@@ -79,10 +79,10 @@ int main(void)
 	EXTI_Configuration(); 
  
 	/* TIM Configuration */ 
-//	TIM_Configuration(); 
+	TIM_Configuration(); 
  
 	/* I2C Configuration */ 
-//	I2C_Configuration(); 
+	I2C_Configuration(); 
 
 	/* DMA Configuration */
 //	DMA_Configuration(); 
@@ -94,7 +94,7 @@ int main(void)
 	SysTick_Configuration(); 
  
 	/* Init rfm12 module */ 
-//	rf12_init();   
+	rf12_init();   
 
 #ifdef PILOT
 
@@ -106,10 +106,10 @@ int main(void)
 
 #else
 	/* Init GPS sensor */ 
-//	gps_init(); 
+	gps_init(); 
  
 	/* Init send/recive rfm12 controller */ 
-//	rf12_controller_init(); 
+	rf12_controller_init(); 
 
 #endif
 	
@@ -118,7 +118,10 @@ int main(void)
  
 	while (1)  					   
 	{		  
-/* 
+
+		// send string
+		rf12_txstart(wartoscADC1VTekst, 0);
+
 		// blink LED 
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
     	GPIO_SetBits(LEDS_PORT, LED_BIT_2);   //LED9 OFF 
@@ -126,9 +129,6 @@ int main(void)
 		GPIO_SetBits(LEDS_PORT, LED_BIT_1);   //LED9 ON 
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
 		Delay_ms(100); 
-  */
-
-  rf12_trans(0xAA00);
 
 #ifdef QUAD
 
@@ -150,21 +150,7 @@ int main(void)
 		
 #endif 
 
-/*
-
-
-#ifdef PILOT		  
-		LS020_fill_screen(GREEN);
-  		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
-		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
-		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
-		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
-		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
-
-//		sd_write_line("date.txt", "test 12345", 10, 1);
-#endif 
-
-#ifdef PILOT		 
+#ifdef PILOTn
  
 		if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart(); 
  
@@ -188,7 +174,7 @@ int main(void)
 			} 
 		} 
 #endif 
-	*/
+
 	}; 
 } 
  
@@ -226,13 +212,13 @@ void GPIO_Configuration(void)
 */
 
 	// GPIO for LEDs
-/* 
+
 	//LEDs 
 	GPIO_InitStructure.GPIO_Pin = LED_BIT_1 | LED_BIT_2 | LED_BIT_3 | LED_BIT_4 | LED_BIT_5 | LED_BIT_6; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(LEDS_PORT, &GPIO_InitStructure);  
-*/
+
 	// GPIO for rfm12
  
 	// SPI - CS 
@@ -241,24 +227,18 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(RFM12_PORT_SS, &GPIO_InitStructure); 
  
-	// SPI - CS 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10; 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	GPIO_Init(GPIOC, &GPIO_InitStructure); 
-
 	// SPI - INT 
-	GPIO_InitStructure.GPIO_Pin = RFM12_BIT_SS; 
+	GPIO_InitStructure.GPIO_Pin = RFM12_BIT_INT; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	GPIO_Init(RFM12_PORT_SS, &GPIO_InitStructure); 
+	GPIO_Init(RFM12_PORT_INT, &GPIO_InitStructure); 
  
 	// SPI - SCK, MOSI 
 	GPIO_InitStructure.GPIO_Pin = RFM12_BIT_SCK | RFM12_BIT_MOSI | RFM12_BIT_MISO; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(RFM12_PORT_SPI, &GPIO_InitStructure); 
-/* 
+
 #ifdef PILOT 
 	// GPIO for LCD
  
@@ -311,9 +291,9 @@ void GPIO_Configuration(void)
     GPIO_Init(LCD_PORT_LS020, &GPIO_InitStructure);
 
 #endif 
-		*/
+
 #ifdef QUAD 
-/*
+
 	// GPIO for I2C
 
     GPIO_InitStructure.GPIO_Pin =  PRESSURE_BIT_1 | PRESSURE_BIT_2; 
@@ -334,8 +314,7 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Pin = GPS_BIT_RX; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(GPS_PORT, &GPIO_InitStructure); 
-	*/
-/* 
+
 	// GPIO for TEMPERATURE
  
 	// TEMPERATURE 
@@ -343,7 +322,7 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(TEMPERATURE_PORT, &GPIO_InitStructure);	 
-  */
+  
 /*
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -413,47 +392,47 @@ void RCC_Configuration(void)
 	/* SPI1 clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE); 
  
-//#ifdef QUAD 
+#ifdef QUAD 
 	/* GPIO A/B/C/D clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE); 
-//#else
+#else
 	/* GPIO A/B/C/D/E/G clock enable */ 
-//    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | RCC_APB2Periph_GPIOG, ENABLE); 
-//#endif
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | RCC_APB2Periph_GPIOG, ENABLE); 
+#endif
   
 	/* AFIO clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); 
  
 	/* USART1 clock enable */ 
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);  
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);  
 
 	/* TIM1 clock enable */	 
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); 
  
 #ifdef QUAD 
 	/* USART2 clock enable */ 
-//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  
  
 	/* TIM3 clock enable */	 
-//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
  
 	/* I2C clock enable */	 
-//    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
 
 	/* ADC1 clock enable */	 
-//    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 
 	/* DMA1 clock enable */	 
-//    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
 	// ADCCLK = PCLK2/4 = 56 MHz /4 = 14 MHz (maksymalna mozliwa)
-//    RCC_ADCCLKConfig(RCC_PCLK2_Div4);  
+    RCC_ADCCLKConfig(RCC_PCLK2_Div4);  
 
 #endif 
 
 #ifdef PILOT 
 	/* SPI2 clock enable */ 
-//    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE); 
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE); 
 #endif 
 
 } 
@@ -478,12 +457,12 @@ void NVIC_Configuration(void)
 	//Wybor modelu grupowania przerwan 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0); 
 
-#ifdef QUAD 	 
+#ifdef PILOT 	 
 	//Wybor konfigurowanego IRQ 
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn; 
 #else
 	//Wybor konfigurowanego IRQ 
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10IRQn; 
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn; 
 #endif
 	 
 	//Priorytet grupowy 
@@ -562,7 +541,7 @@ void SPI_Configuration(void) {
  
 	/* SPI for rfm12 */ 
 
-	// Konfiguracja SPI1 
+	// Konfiguracja SPI 
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex; 
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master; 
 //	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b; 
@@ -581,7 +560,7 @@ void SPI_Configuration(void) {
 	
 	/* SPI for SD */ 
 
-	// Konfiguracja SPI2
+	// Konfiguracja SPI
 	SPI_InitStructure.SPI_Direction =  SPI_Direction_2Lines_FullDuplex;
     SPI_InitStructure.SPI_Mode = SPI_Mode_Master;              
     SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;  
@@ -597,7 +576,7 @@ void SPI_Configuration(void) {
 
 	/* SPI for LCD */ 
 
-	// Konfiguracja SPI2
+	// Konfiguracja SPI
     SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
     SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;

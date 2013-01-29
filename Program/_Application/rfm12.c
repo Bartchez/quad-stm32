@@ -40,6 +40,7 @@ void rf12_init( void ) {
 //	rf12_trans(0xCA82);
 //	rf12_trans(0xFE00);
 //	rfm12_delay(0x00ffff);
+//	rf12_trans(0x0000);
 
 	// ustawinie nowych wartosci w rejestrach
 	rf12_trans(0x80D8);//enable register,433MHz,12.5pF
@@ -255,9 +256,9 @@ void rf12_allstop(void) {
 } 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-uint8_t rf12_send(uint16_t data) {
+uint16_t rf12_send(uint16_t data) {
 
-	uint8_t ret = 0;
+	uint16_t ret = 0;
 
 	SS_ASSERT();
 
@@ -270,7 +271,6 @@ uint8_t rf12_send(uint16_t data) {
 	ret = SPI_I2S_ReceiveData(RFM12_SPI);
 
 	while (SPI_I2S_GetFlagStatus(RFM12_SPI, SPI_I2S_FLAG_BSY) == SET);
-
 
 	SS_RELEASE();
 

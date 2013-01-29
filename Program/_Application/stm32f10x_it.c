@@ -171,7 +171,7 @@ void EXTI0_IRQHandler(void)
 #endif
 }
 
-void EXTI10_5_IRQHandler(void)
+void EXTI9_5_IRQHandler(void)
 {
 #ifdef QUAD
 	uint16_t status = 0;
@@ -221,54 +221,6 @@ void TIM1_UP_IRQHandler(void) {
 
 /******************************************************************************/
 /******************************************************************************/
-
-#ifdef Lab3_Exti
-/******************************************************************************/
-/*            STM32F10x Peripherals Interrupt Handlers                        */
-/******************************************************************************/
-
-/**
-  * @brief  This function handles External lines 9 to 5 interrupt request.
-  * @param  None
-  * @retval None
-  */
-void EXTI9_5_IRQHandler(void)
-{
-
-    GPIO_ResetBits(GPIOE, GPIO_Pin_14 | GPIO_Pin_15);
-    /* Clear the Key Button EXTI line pending bit */
-    EXTI_ClearITPendingBit(EXTI_Line9);
-}
-
-/**
-  * @brief  This function handles External lines 15 to 10 interrupt request.
-  * @param  None
-  * @retval None
-  */
-void EXTI15_10_IRQHandler(void)
-{
- if(EXTI_GetITStatus(EXTI_Line10) != RESET)
-  {
-    GPIO_SetBits(GPIOE, GPIO_Pin_14);
-    GPIO_ResetBits(GPIOE, GPIO_Pin_15);
-    /* Clear the EXTI line 10 pending bit */
-    EXTI_ClearITPendingBit(EXTI_Line10);
-  }
- else if(EXTI_GetITStatus(EXTI_Line11) != RESET)
-  {
-    GPIO_SetBits(GPIOE, GPIO_Pin_15);
-    GPIO_ResetBits(GPIOE, GPIO_Pin_14);
-    /* Clear the EXTI line 11 pending bit */
-    EXTI_ClearITPendingBit(EXTI_Line11);
-  }
- else if(EXTI_GetITStatus(EXTI_Line12) != RESET)
-  {
-    GPIO_SetBits(GPIOE, GPIO_Pin_14 | GPIO_Pin_15);
-    /* Clear the EXTI line 12 pending bit */
-    EXTI_ClearITPendingBit(EXTI_Line12);
-  }
-}
-#endif
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
