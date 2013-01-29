@@ -61,7 +61,7 @@ int main(void)
 //	unsigned char wartoscADC1VTekst[7] = "text\0";
  
 	/* NVIC Configuration */ 
-	NVIC_Configuration(); 
+//	NVIC_Configuration(); 
  
 	/* System Clocks Configuration */ 
 	RCC_Configuration(); 
@@ -73,10 +73,10 @@ int main(void)
 //	USART_Configuration(); 
  
 	/* SPI Configuration */ 
-//	SPI_Configuration(); 
+	SPI_Configuration(); 
  
 	/* EXTI Configuration */ 
-//	EXTI_Configuration(); 
+	EXTI_Configuration(); 
  
 	/* TIM Configuration */ 
 //	TIM_Configuration(); 
@@ -114,11 +114,11 @@ int main(void)
 #endif
 	
 	// odcekaj po konfuguracji rfm12 
-	Delay_ms(10); 
+//	Delay_ms(10); 
  
 	while (1)  					   
 	{		  
- 
+/* 
 		// blink LED 
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
     	GPIO_SetBits(LEDS_PORT, LED_BIT_2);   //LED9 OFF 
@@ -126,14 +126,17 @@ int main(void)
 		GPIO_SetBits(LEDS_PORT, LED_BIT_1);   //LED9 ON 
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
 		Delay_ms(100); 
- 
+  */
+
+  rf12_trans(0xAA00);
+
 #ifdef QUAD
 
 		// read pressure values sensor and save to mpl115a2_pressure ivar 
 //		mpl115a2_read_pressure(); 
 
 		// read temp values from 6 sensors and save to temp_measurements array 
-		ds18b20_read_temps();
+//		ds18b20_read_temps();
 
 		/*
 	    // Tu nalezy umiescic glowny kod programu
@@ -146,6 +149,9 @@ int main(void)
 		*/
 		
 #endif 
+
+/*
+
 
 #ifdef PILOT		  
 		LS020_fill_screen(GREEN);
@@ -166,7 +172,7 @@ int main(void)
  
 			ret = rf12_rxfinish(test);	// sprawdY czy odebrano kompletn1 ramke 
  
-			if(ret > 0 && ret < 254) {	// brak b3edów CRC - odebrana ramka 
+			if(ret > 0 && ret < 254) {	// brak bledów CRC - odebrana ramka 
 				printf(test);		// wyolij odebrane dane do terminala PC 
 
 				test[16]=0;				// przytnij dane do 16 znaków ASCII 
@@ -182,6 +188,7 @@ int main(void)
 			} 
 		} 
 #endif 
+	*/
 	}; 
 } 
  
@@ -194,16 +201,16 @@ void GPIO_Configuration(void)
 	/* Configure all unused GPIO port pins in Analog Input mode (floating input 
      trigger OFF), this will reduce the power consumption and increase the device 
      immunity against EMI/EMC *************************************************/ 
+
  
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; 
 	GPIO_Init(GPIOA, &GPIO_InitStructure); 
 	GPIO_Init(GPIOB, &GPIO_InitStructure); 
-	GPIO_Init(GPIOC, &GPIO_InitStructure); 
- 
- 
-	/* GPIO for COM */ 
- 
+	GPIO_Init(GPIOC, &GPIO_InitStructure);  
+
+	// GPIO for COM
+/* 
 	// USART1 - TX 
     GPIO_InitStructure.GPIO_Pin = COM_BIT_TX;	          
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  
@@ -216,18 +223,17 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;   
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;  
     GPIO_Init(COM_PORT, &GPIO_InitStructure); 
- 
- 
-	/* GPIO for LEDs */ 
- 
+*/
+
+	// GPIO for LEDs
+/* 
 	//LEDs 
 	GPIO_InitStructure.GPIO_Pin = LED_BIT_1 | LED_BIT_2 | LED_BIT_3 | LED_BIT_4 | LED_BIT_5 | LED_BIT_6; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(LEDS_PORT, &GPIO_InitStructure);  
- 
- 
-	/* GPIO for rfm12 */ 
+*/
+	// GPIO for rfm12
  
 	// SPI - CS 
 	GPIO_InitStructure.GPIO_Pin = RFM12_BIT_SS; 
@@ -235,20 +241,26 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(RFM12_PORT_SS, &GPIO_InitStructure); 
  
-	// SPI - INT 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0; 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+	// SPI - CS 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(GPIOC, &GPIO_InitStructure); 
+
+	// SPI - INT 
+	GPIO_InitStructure.GPIO_Pin = RFM12_BIT_SS; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_Init(RFM12_PORT_SS, &GPIO_InitStructure); 
  
 	// SPI - SCK, MOSI 
 	GPIO_InitStructure.GPIO_Pin = RFM12_BIT_SCK | RFM12_BIT_MOSI | RFM12_BIT_MISO; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(RFM12_PORT_SPI, &GPIO_InitStructure); 
- 
+/* 
 #ifdef PILOT 
-	/* GPIO for LCD */ 
+	// GPIO for LCD
  
 	//PWM 
 	GPIO_InitStructure.GPIO_Pin = PWM_BIT_1; 
@@ -257,7 +269,7 @@ void GPIO_Configuration(void)
 	GPIO_Init(PWM_PORT, &GPIO_InitStructure); 
 
 
-	/* GPIO for SD */ 
+	// GPIO for SD
  
     // SD - CS 
     GPIO_InitStructure.GPIO_Pin = SD_BIT_SS;
@@ -278,7 +290,7 @@ void GPIO_Configuration(void)
     GPIO_Init(SD_PORT_DETECT, &GPIO_InitStructure);
 
 
-	/* GPIO for LCD */ 
+	// GPIO for LCD
  
     // SD - CS 
     GPIO_InitStructure.GPIO_Pin = LCD_BIT_SS;
@@ -299,21 +311,20 @@ void GPIO_Configuration(void)
     GPIO_Init(LCD_PORT_LS020, &GPIO_InitStructure);
 
 #endif 
- 
- 
+		*/
 #ifdef QUAD 
-	/* GPIO for I2C */ 
+/*
+	// GPIO for I2C
 
     GPIO_InitStructure.GPIO_Pin =  PRESSURE_BIT_1 | PRESSURE_BIT_2; 
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD; 
     GPIO_Init(PRESSURE_PORT, &GPIO_InitStructure); 
-
  
-	/* GPIO for GPS */ 
+	// GPIO for GPS
  
 	// USART2 - TX 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD; 
 	GPIO_InitStructure.GPIO_Pin = GPS_BIT_TX; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(GPS_PORT, &GPIO_InitStructure); 
@@ -323,16 +334,16 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Pin = GPS_BIT_RX; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(GPS_PORT, &GPIO_InitStructure); 
- 
- 
-	/* GPIO for TEMPERATURE */ 
+	*/
+/* 
+	// GPIO for TEMPERATURE
  
 	// TEMPERATURE 
 	GPIO_InitStructure.GPIO_Pin = TEMPERATURE_BIT_1 | TEMPERATURE_BIT_2 | TEMPERATURE_BIT_3 | TEMPERATURE_BIT_4 |TEMPERATURE_BIT_5 | TEMPERATURE_BIT_6;	          
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(TEMPERATURE_PORT, &GPIO_InitStructure);	 
-
+  */
 /*
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -402,47 +413,47 @@ void RCC_Configuration(void)
 	/* SPI1 clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE); 
  
-#ifdef QUAD 
+//#ifdef QUAD 
 	/* GPIO A/B/C/D clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE); 
-#else
+//#else
 	/* GPIO A/B/C/D/E/G clock enable */ 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | RCC_APB2Periph_GPIOG, ENABLE); 
-#endif
- 
+//    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | RCC_APB2Periph_GPIOG, ENABLE); 
+//#endif
+  
 	/* AFIO clock enable */ 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); 
  
 	/* USART1 clock enable */ 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);  
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);  
 
 	/* TIM1 clock enable */	 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); 
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); 
  
 #ifdef QUAD 
 	/* USART2 clock enable */ 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  
  
 	/* TIM3 clock enable */	 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
  
 	/* I2C clock enable */	 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
+//    RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
 
 	/* ADC1 clock enable */	 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+//    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 
 	/* DMA1 clock enable */	 
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+//    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
 	// ADCCLK = PCLK2/4 = 56 MHz /4 = 14 MHz (maksymalna mozliwa)
-    RCC_ADCCLKConfig(RCC_PCLK2_Div4);  
+//    RCC_ADCCLKConfig(RCC_PCLK2_Div4);  
 
 #endif 
 
 #ifdef PILOT 
 	/* SPI2 clock enable */ 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE); 
+//    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE); 
 #endif 
 
 } 
@@ -466,9 +477,14 @@ void NVIC_Configuration(void)
 	//Konfiguracja NVIC - ustawienia priorytetow przerwania EXT0 
 	//Wybor modelu grupowania przerwan 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0); 
-	 
+
+#ifdef QUAD 	 
 	//Wybor konfigurowanego IRQ 
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn; 
+#else
+	//Wybor konfigurowanego IRQ 
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10IRQn; 
+#endif
 	 
 	//Priorytet grupowy 
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; 
@@ -511,16 +527,22 @@ void NVIC_Configuration(void)
 void EXTI_Configuration(void)  
 { 
  
-	EXTI_InitTypeDef EXTI_InitStructure; 
- 
 	/* EXTI for rfm12 */ 
- 
+	EXTI_InitTypeDef EXTI_InitStructure; 
+
+#ifdef QUAD 
+	//Ustawienia zrodla przerwania 
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource9); 
+
+	//Wybor lini 
+	EXTI_InitStructure.EXTI_Line = EXTI_Line9; 
+#else
 	//Ustawienia zrodla przerwania 
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource0); 
-	 
-	//Konfiguracja przerwania EXTI0 na linie 1 
+
 	//Wybor lini 
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0; 
+#endif
 	 
 	//Ustawienie generowania przerwania 
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt; 
@@ -543,11 +565,13 @@ void SPI_Configuration(void) {
 	// Konfiguracja SPI1 
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex; 
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master; 
-	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b; 
+//	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b; 
+	SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b; 
 	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low; 
 	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge; 
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft; 
-	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32; 
+//	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32; 
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256; 
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB; 
 	SPI_InitStructure.SPI_CRCPolynomial = 7; 
 	SPI_Init(RFM12_SPI, &SPI_InitStructure); 
@@ -601,8 +625,6 @@ void USART_Configuration(void) {
 	USART_InitStructure.USART_Parity = USART_Parity_No; 
 	// Kontrola przeplywu danych wylaczona 
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; 
-	//Tryb pracy (Rx - odbior, Tx - nadawanie) 
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; 
  
  
 	/* USART for GPS */ 
@@ -612,6 +634,8 @@ void USART_Configuration(void) {
 	USART_DeInit(GPS_USART); 
  	// predkosc transmisji = 9600 
  	USART_InitStructure.USART_BaudRate = 9600; 
+	//Tryb pracy (Rx - odbior, Tx - nadawanie) 
+	USART_InitStructure.USART_Mode = USART_Mode_Rx; 
  
 	// Init - USART 
 	USART_Init(GPS_USART, &USART_InitStructure); 
@@ -623,11 +647,13 @@ void USART_Configuration(void) {
 #endif 
  
 	/* USART for COM */ 
- 
+/* 
 	// reset 
 	USART_DeInit(COM_USART); 
  	// predkosc transmisji = 115200 
  	USART_InitStructure.USART_BaudRate = 115200; 
+	//Tryb pracy (Rx - odbior, Tx - nadawanie) 
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; 
  
 	// Init - USART 
 	USART_Init(COM_USART, &USART_InitStructure);  
@@ -636,6 +662,8 @@ void USART_Configuration(void) {
 	USART_ITConfig(COM_USART, USART_IT_TXE, ENABLE); 
 	// Wlaczenie USART 
 	USART_Cmd(COM_USART, ENABLE); 
+*/
+
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -725,7 +753,7 @@ void I2C_Configuration(void)
 void DMA_Configuration(void) {
 #ifdef QUAD 
 	//konfigurowanie DMA
-
+/*
 	#define ADC1_DR_Address 0x4001244C;                                             //adres rejestru ADC1->DR
   
 	DMA_InitTypeDef DMA_InitStructure;
@@ -747,12 +775,14 @@ void DMA_Configuration(void) {
 
 	//Wlacz DMA, kanal 1
 	DMA_Cmd(DMA1_Channel1, ENABLE);  
+	*/
 #endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void ADC_Configuration(void) {
 #ifdef QUAD 
+/*
 	//konfigurowanie przetwornika AC
 	ADC_InitTypeDef ADC_InitStructure;
 	  
@@ -788,7 +818,7 @@ void ADC_Configuration(void) {
 	while(ADC_GetCalibrationStatus(ADC1));    	                        				//Odczekanie na zakonczenie kalibracji ADC1
 
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);                             				//rozpocznij przetwarzanie AC
-
+*/
 #endif
 }
 

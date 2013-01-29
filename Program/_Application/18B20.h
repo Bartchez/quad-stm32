@@ -39,7 +39,5 @@ extern volatile char temp_measurements_string[50];
 
 // read temp values from 6 sensors and save to temp_measurements array
 void ds18b20_read_temps(void);
-
-float perform_conversion(uint8_t lowByte, uint8_t highByte, uint16_t pin);
-
 #endif /*_18B20_H*/
+

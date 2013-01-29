@@ -25,8 +25,8 @@ uint8_t rf12_data[rf12_max_length + 10];	// +10 nadmiarowo na pozosta3e czeoci r
 #define SYNC_LSB 0xD4
 
 //hardware spi helper macros
-#define SS_ASSERT()		GPIO_WriteBit(RFM12_PORT_SS, RFM12_BIT_SS, Bit_RESET)
-#define SS_RELEASE()	GPIO_WriteBit(RFM12_PORT_SS, RFM12_BIT_SS, Bit_SET)
+#define SS_ASSERT()		GPIO_ResetBits(RFM12_PORT_SS, RFM12_BIT_SS)
+#define SS_RELEASE()	GPIO_SetBits(RFM12_PORT_SS, RFM12_BIT_SS)
 
 //#pragma mark - RFM12 Configuration
 void rfm12_delay(__IO uint32_t nCount);
@@ -255,9 +255,11 @@ void rf12_allstop(void) {
 } 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-uint8_t rf12_send(uint8_t data) {
+uint8_t rf12_send(uint16_t data) {
 
 	uint8_t ret = 0;
+
+	SS_ASSERT();
 
 	// Wyslanie bajtu z SD
 	while (SPI_I2S_GetFlagStatus(RFM12_SPI, SPI_I2S_FLAG_TXE) == RESET);
@@ -267,52 +269,27 @@ uint8_t rf12_send(uint8_t data) {
 	while (SPI_I2S_GetFlagStatus(RFM12_SPI, SPI_I2S_FLAG_RXNE) == RESET);
 	ret = SPI_I2S_ReceiveData(RFM12_SPI);
 
+	while (SPI_I2S_GetFlagStatus(RFM12_SPI, SPI_I2S_FLAG_BSY) == SET);
+
+
+	SS_RELEASE();
+
 	return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_trans(uint16_t data) {
-	SS_ASSERT();
-
-	// send older bits and save response
-	rf12_send(data >> 8) << 8;
-	
-	// send younger bits and save response
-	rf12_send(data & 0xff);
-
-	SS_RELEASE();
+	rf12_send(data);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 uint16_t rf12_read_status() {
-    uint16_t reply;
-	SS_ASSERT();
-
-	// send older bits and save response
-	reply = rf12_send(0x00) << 8;
-	
-	// send younger bits and save response
-	reply |= rf12_send(0x00);
-
-	SS_RELEASE();
-
-	return reply;	
+	return rf12_send(0x0000);	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 uint16_t rf12_read_fifo(void) {
-    uint16_t reply;
-	SS_ASSERT();
-
-	// send older bits and save response
-	reply = rf12_send(0xB0) << 8;
-	
-	// send younger bits and save response
-	reply |= rf12_send(0x00);
-
-	SS_RELEASE();
-
-	return reply;	
+	return rf12_send(0xB000);	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

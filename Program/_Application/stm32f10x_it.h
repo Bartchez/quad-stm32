@@ -42,7 +42,7 @@ void SysTick_Handler(void);
 void EXTI9_5_IRQHandler(void);
 void USART2_IRQHandler(void);
 void EXTI0_IRQHandler(void);
-
+void EXTI10_5IRQHandler(void);
 
 #endif /* __STM32F10x_IT_H */
 

@@ -386,7 +386,8 @@ void LS020_message_centerXY(uint8_t x,uint8_t y, uint16_t textcolor, uint16_t ba
 {
  uint8_t l;
 
- l = strLen((uint8_t *)string);
+ //l = strLen((uint8_t *)string);
+ l = 10;
  if(l > (176/CHAR_W))	
  l = 176/CHAR_W;
 	//xx = x - ((l/2)*CHAR_W);

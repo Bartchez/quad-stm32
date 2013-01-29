@@ -20,8 +20,10 @@
 	#define RFM12_SPI				SPI1
 
 	// SPI - CS	 
-	#define RFM12_PORT_SS			GPIOA
-	#define RFM12_BIT_SS			GPIO_Pin_8
+	#define RFM12_PORT_SS			GPIOB
+	#define RFM12_BIT_SS			GPIO_Pin_14
+//	#define RFM12_PORT_SS			GPIOA
+//	#define RFM12_BIT_SS			GPIO_Pin_8
 
 	// SPI - DATA
 	#define RFM12_PORT_SPI			GPIOA

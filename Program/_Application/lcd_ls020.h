@@ -9,6 +9,9 @@
 //#include "main.h"
 #include "qdt_config.h"
 
+#include <stdio.h>
+#include <string.h>
+
 #define uint8_t  unsigned char
 #define  int8_t    signed char
 #define uint16_t unsigned int
