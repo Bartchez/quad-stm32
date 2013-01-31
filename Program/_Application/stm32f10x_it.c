@@ -188,7 +188,7 @@ void TIM1_UP_IRQHandler(void) {
 #ifdef PILOT	
   	
 		// karta SD
-//		disk_timerproc();
+		disk_timerproc();
 #endif
 
 	}

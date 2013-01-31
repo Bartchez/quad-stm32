@@ -99,10 +99,10 @@ int main(void)
 #ifdef PILOT
 
 	/* Init SD card */
-//	sd_init();
+	sd_init();
 
 	/* Init LCD */
-//    S65_init();
+    S65_init();
 
 #else
 	/* Init GPS sensor */ 
@@ -115,12 +115,25 @@ int main(void)
 	
 	// odcekaj po konfuguracji rfm12 
 //	Delay_ms(10); 
- 
+
+	
+	LS020_fill_screen(GREEN);
+
+	while (1) {		  
+//		sd_write_line("xxx.txt", wartoscADC1VTekst, 0, 1);
+
+		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
+		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
+		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
+		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
+		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
+	} 
+	
 	while (1)  					   
 	{		  
 
 		// send string
-		rf12_txstart(wartoscADC1VTekst, 0);
+//		rf12_txstart(wartoscADC1VTekst, 0);
 
 		// blink LED 
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
@@ -150,7 +163,7 @@ int main(void)
 		
 #endif 
 
-#ifdef PILOTn
+#ifdef PILOT
  
 		if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart(); 
  
@@ -277,18 +290,30 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(LCD_PORT_SS, &GPIO_InitStructure);
 
-    //SD - SCK, MISO, MOSI
+    //SD - SCK, MOSI
+    GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MOSI;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
+
+/*
+    // poprawienie bledu RUDEGO
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    //SD - SCK, MOSI
     GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MOSI;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
-
+*/
 	// RS & RESET
     GPIO_InitStructure.GPIO_Pin   = LCD_PIN_RESET | LCD_PIN_RS;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_Init(LCD_PORT_LS020, &GPIO_InitStructure);
-
 #endif 
 
 #ifdef QUAD 
@@ -369,7 +394,7 @@ void RCC_Configuration(void)
     	/* PCLK1 = HCLK/2 */ 
 		RCC_PCLK1Config(RCC_HCLK_Div2); 
  
-//    	/* PLLCLK = 8MHz * 9 = 72 MHz */ 
+    	/* PLLCLK = 8MHz * 9 = 72 MHz */ 
 //		RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9); 
 
 		/* PLLCLK = HSE*7 czyli 8MHz * 7 = 56 MHz */  
@@ -411,10 +436,7 @@ void RCC_Configuration(void)
 #ifdef QUAD 
 	/* USART2 clock enable */ 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  
- 
-	/* TIM3 clock enable */	 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
- 
+  
 	/* I2C clock enable */	 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
 
@@ -430,8 +452,14 @@ void RCC_Configuration(void)
 #endif 
 
 #ifdef PILOT 
+	/* TIM3 clock enable */	 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
+
 	/* SPI2 clock enable */ 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE); 
+
+	/* SPI3 clock enable */ 
+//    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE); 
 #endif 
 
 } 
@@ -565,7 +593,7 @@ void SPI_Configuration(void) {
 
 
 	/* SPI for LCD */ 
-
+/*
 	// Konfiguracja SPI
     SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
@@ -578,7 +606,7 @@ void SPI_Configuration(void) {
     SPI_InitStructure.SPI_CRCPolynomial= 7;
     SPI_Init(LCD_SPI, &SPI_InitStructure);
     SPI_Cmd(LCD_SPI, ENABLE);
-
+*/
 #endif
 } 
  
@@ -671,7 +699,8 @@ void TIM_Configuration(void)
  
 	/* Time base configuration */ 
 	TIM_TimeBaseStructure.TIM_Prescaler = 0;          
-	TIM_TimeBaseStructure.TIM_Period = 1439ul;	// PWM = 50kHz
+//	TIM_TimeBaseStructure.TIM_Period = 1439ul;	// PWM = 50kHz
+	TIM_TimeBaseStructure.TIM_Period = 999ul;	// PWM = 50kHz
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
  
@@ -681,7 +710,8 @@ void TIM_Configuration(void)
 	/* PWM1 Mode configuration: Channel3 */ 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
-	TIM_OCInitStructure.TIM_Pulse = 720ul;	// 1440 / 720 = 50% 
+//	TIM_OCInitStructure.TIM_Pulse = 720ul;	// 1440 / 720 = 50% 
+	TIM_OCInitStructure.TIM_Pulse = 500ul;	// 1440 / 720 = 50% 
 	TIM_OCInitStructure.TIM_OCPolarity=TIM_OCPolarity_High; 
 	TIM_OC3Init(PWM_TIMER, &TIM_OCInitStructure); 
  

@@ -80,6 +80,9 @@
 #define LCD_BIT_SS				GPIO_Pin_1
 
 // SPI - DATA
+//#define LCD_PORT_SPI			GPIOB
+//#define LCD_BIT_SCK			GPIO_Pin_3
+//#define LCD_BIT_MOSI			GPIO_Pin_5  
 #define LCD_PORT_SPI			GPIOC
 #define LCD_BIT_SCK				GPIO_Pin_10
 #define LCD_BIT_MOSI			GPIO_Pin_12  
