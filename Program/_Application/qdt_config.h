@@ -6,8 +6,8 @@
 #include <stm32f10x.h>
 
 // define QUAD or PILOT
-//#define QUAD
-#define PILOT
+#define QUAD
+//#define PILOT
 
 
 /***
@@ -46,8 +46,6 @@
 	#define RFM12_BIT_MOSI			GPIO_Pin_15  
 
 	// SPI - INT 
-//	#define RFM12_PORT_INT			GPIOC
-//	#define RFM12_BIT_INT			GPIO_Pin_0 
 	#define RFM12_PORT_INT			GPIOD
 	#define RFM12_BIT_INT			GPIO_Pin_8 
 #endif

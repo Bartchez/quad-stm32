@@ -56,12 +56,12 @@ void rf12_controller_send() {
 
 	// send tension
 	else if (rf12_data_type & rf12_tension) {
-		rf12_controller_send_tension();
+//		rf12_controller_send_tension();
 	}
 
 	// send current
 	else if (rf12_data_type & rf12_current) {
-		rf12_controller_send_current();	
+//		rf12_controller_send_current();	
 	}
 
 	// move to next enum

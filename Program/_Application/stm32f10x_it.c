@@ -141,8 +141,7 @@ void USART2_IRQHandler(void)
 {
 #ifdef QUAD
 	//obsluga przerwania
-	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
-	{
+	if(USART_GetITStatus(GPS_USART, USART_IT_RXNE) != RESET) {
 		gps_pool();
 	}
 #endif
@@ -150,22 +149,19 @@ void USART2_IRQHandler(void)
 
 void EXTI9_5_IRQHandler(void)
 {
-	uint16_t status = 0;
+#ifdef QUAD
+	uint32_t EXTI_Line = EXTI_Line9;
+#else
+	uint32_t EXTI_Line = EXTI_Line8;
+#endif
 
-	if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
+	if (EXTI_GetITStatus(EXTI_Line) != RESET) {
 			
 		// wylaczenie flagi obslugi przerwania
-		EXTI_ClearITPendingBit(EXTI_Line9);
+		EXTI_ClearITPendingBit(EXTI_Line);
 
-		// pobranie statusu
-		status = rf12_read_status();
-		
-		// interesuje nas najstarszy bit
-		if (status & RFM12_STATUS_RGIT) {		
-
-			// wyslanie, odebranie bajtu
-			rf12_pool();
-		}
+		// wyslanie, odebranie bajtu
+		rf12_pool();
 	}
 }
 

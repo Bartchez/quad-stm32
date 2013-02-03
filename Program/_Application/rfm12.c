@@ -37,14 +37,18 @@ void rf12_init( void ) {
 	rf12_rx = 0; rf12_tx = 0; rf12_new = 0;
 
 	// reset rejestrow na rfm12
-//	rf12_trans(0xCA82);
-//	rf12_trans(0xFE00);
+	rf12_trans(0xCA82);
+	rf12_trans(0xFE00);
 //	rfm12_delay(0x00ffff);
-//	rf12_trans(0x0000);
+	rf12_trans(0x0000);
 
 	// ustawinie nowych wartosci w rejestrach
 	rf12_trans(0x80D8);//enable register,433MHz,12.5pF
 	rf12_trans(0x82D8);//enable receive,!PA
+
+//rf12_trans(0x8058);
+//rf12_trans(0x8280);
+
 	rf12_trans(0xA640);//434MHz
 	rf12_trans(0xC647);//
 	rf12_trans(0x94A0);//VDI,FAST,134kHz,0dBm,-103dBm
@@ -85,37 +89,47 @@ uint16_t crc_update(uint16_t crc, uint8_t serialData) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_pool() { 
 	uint8_t data = 0; 
-	if (rf12_rx) { 
-		if (rf12_index < rf12_max_length) { 
-			data = rf12_read_fifo() & 0x00FF; 
-			rf12_data[rf12_index++] = data; 
-		} else { 
-			rf12_trans(0x8208); 
-			rf12_rx = 0; 
-			rf12_new = 1; 
-			return; 				// na pewno bedzie b3edna ramka 
-		} 
-		if (rf12_index >= rf12_data[0] + 3) { 
+	uint16_t status = 0;
+
+	// pobranie statusu
+	status = rf12_read_status();
+		
+	// interesuje nas najstarszy bit
+	if (status & RFM12_STATUS_RGIT) {		
+		if (rf12_rx) { 
+			if (rf12_index < rf12_max_length) { 
+				data = rf12_read_fifo() & 0x00FF; 
+				rf12_data[rf12_index++] = data; 
+			} else { 
+				rf12_trans(0x8208); 
+				rf12_rx = 0; 
+				rf12_new = 1; 
+				rf12_pool();
+				return; 				// na pewno bedzie b3edna ramka 
+			} 
+			if (rf12_index >= rf12_data[0] + 3) { 
  
-			rf12_trans(0x8208); 
-			rf12_rx = 0; 
-			rf12_new = 1;	// poprawnie zakonczona ramka 
+				rf12_trans(0x8208); 
+				rf12_rx = 0; 
+				rf12_new = 1;	// poprawnie zakonczona ramka 
+			} 
 		} 
-	} 
 	
-	else if (rf12_tx) { 
-		rf12_trans(0xB800 | rf12_data[rf12_index]); 
+		else if (rf12_tx) { 
+			rf12_trans(0xB800 | rf12_data[rf12_index]); 
  
-		if (!rf12_index)	{ 
-			rf12_tx = 0; 
-			printf("tx off"); 
-			rf12_trans(0x8208);		// TX off 
+			if (!rf12_index)	{ 
+				rf12_tx = 0; 
+//				printf("tx off"); 
+				rf12_trans(0x8208);		// TX off 
+				rf12_read_status(); 
+			} else { 
+				rf12_index--; 
+			} 
+//			rf12_pool();
 			rf12_read_status(); 
-		} else { 
-			rf12_index--; 
 		} 
-		rf12_read_status(); 
-	} 
+	}
 } 
  
 ////////////////////////////////////////////////////////////////////////////////////////////////////

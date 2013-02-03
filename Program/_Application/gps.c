@@ -1,4 +1,5 @@
 #include "gps.h"
+#include "qdt_config.h"
 
 volatile char gps_string[50];
 
@@ -171,22 +172,23 @@ void gps_pool(void) {
 	int i = 0;
 
 	//zapis odczytanego znaku
-	RxBuffer[RxCounter] = (USART_ReceiveData(USART2) & 0x7F);
+	RxBuffer[RxCounter] = (USART_ReceiveData(GPS_USART) & 0x7F);
 	//inkrementacja licznika danych
 	RxCounter++;
 	//zabezpieczenie przed wprowadzeniem zbyt dlugiego ciagiu znakow
-	if(
-		(RxBuffer[RxCounter - 2] != '\r') &&
-		(RxBuffer[RxCounter - 1] != '\n') &&
-		(RxCounter == 255)
-	)
-		{RxCounter = 253;}
+	if((RxBuffer[RxCounter - 2] != '\r') &&
+	   (RxBuffer[RxCounter - 1] != '\n') &&
+	   (RxCounter == 255)) 
+	{
+		
+		RxCounter = 253;
+	}
+	
 	//zakonczenie transmisji ciagu znakiem nowej linii
 	else if(
 		(RxBuffer[RxCounter - 2] == '\r') &&
 		(RxBuffer[RxCounter - 1] == '\n')
-	)
-	{
+	) {
 
 		//odebrany ciag jest komunikatem VTG
 		if(
@@ -203,7 +205,7 @@ void gps_pool(void) {
 			for(i=0; i<256; i++)
 			{
 				RxBufferVTG[i] = RxBuffer[i];
-				printf("%c", RxBuffer[i]);
+//				printf("%c", RxBuffer[i]);
 				RxBuffer[i] = 0;
 			}
 			//wyzerowanie licznika
@@ -224,7 +226,7 @@ void gps_pool(void) {
 			for(i=0; i<256; i++)
 			{
 				RxBufferRMC[i] = RxBuffer[i];
-				printf("%c", RxBuffer[i]);
+//				printf("%c", RxBuffer[i]);
 				RxBuffer[i] = 0;
 			}
 			//wyzerowanie licznika

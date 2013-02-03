@@ -49,6 +49,76 @@ void TimingDelay_Decrement(void);
 unsigned short int buforADC[8] = {0};
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
+void blink_LEDs(void) {
+	// blink LED 
+	GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
+    GPIO_SetBits(LEDS_PORT, LED_BIT_2);   //LED9 OFF 
+	Delay_ms(100); 
+	GPIO_SetBits(LEDS_PORT, LED_BIT_1);   //LED9 ON 
+    GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
+	Delay_ms(100); 
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+void quad_main(void) {
+#ifdef QUAD
+	// read pressure values sensor and save to mpl115a2_pressure ivar 
+//	mpl115a2_read_pressure(); 
+
+	// read temp values from 6 sensors and save to temp_measurements array 
+//	ds18b20_read_temps();
+#endif 
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+void pilot_main(void) {
+	uint8_t ret = 0; 
+	char test[120]; 
+
+/*
+#ifdef QUAD
+	LS020_fill_screen(GREEN);
+
+	while (1) {		  
+		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
+		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
+		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
+		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
+		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
+	} 
+#endif
+*/
+
+		rf12_pool();
+
+#ifdef PILOT
+ 
+		if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart(); 
+ 
+		if( rf12_new )	{ 
+ 
+			ret = rf12_rxfinish(test);	// sprawdY czy odebrano kompletn1 ramke 
+ 
+			if(ret > 0 && ret < 254) {	// brak bledów CRC - odebrana ramka 
+//				printf(test);		// wyolij odebrane dane do terminala PC 
+
+				test[16]=0;				// przytnij dane do 16 znaków ASCII 
+			} 
+			else 
+				 
+			if(!ret) {					// wyst1pi3 b31d CRC lub d3ugooci ramki 
+//				printf("\r\n"); 
+//				printf("--------------------\r\n"); 
+//				printf("|  CRC error !!!   |\r\n"); 
+//				printf("--------------------\r\n"); 
+//				printf("\r\n"); 
+			} 
+		} 
+#endif 
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
 int main(void)  
 { 
 
@@ -56,8 +126,6 @@ int main(void)
 //	unsigned long int napiecie, temperatura;
 //	unsigned char Tekst[7] = {"0\0"};
 
-	uint8_t ret = 0; 
-	char test[120]; 
 	unsigned char wartoscADC1VTekst[7] = "text\0";
  
 	/* NVIC Configuration */ 
@@ -112,45 +180,22 @@ int main(void)
 	rf12_controller_init(); 
 
 #endif
-	
-	// odcekaj po konfuguracji rfm12 
-//	Delay_ms(10); 
-
-	
-	LS020_fill_screen(GREEN);
 
 	while (1) {		  
-//		sd_write_line("xxx.txt", wartoscADC1VTekst, 0, 1);
+//			rf12_txstart("sdfsdf", 0);
 
-		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
-		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
-		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
-		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
-		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
-	} 
-	
-	while (1)  					   
-	{		  
+		// blink LED1 & LED2
+		blink_LEDs();
+
+		// main for QUAD
+		quad_main();
+		
+		// main for PILOT
+		pilot_main();
+	}; 
 
 		// send string
 //		rf12_txstart(wartoscADC1VTekst, 0);
-
-		// blink LED 
-		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
-    	GPIO_SetBits(LEDS_PORT, LED_BIT_2);   //LED9 OFF 
-		Delay_ms(100); 
-		GPIO_SetBits(LEDS_PORT, LED_BIT_1);   //LED9 ON 
-    	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
-		Delay_ms(100); 
-
-#ifdef QUAD
-
-		// read pressure values sensor and save to mpl115a2_pressure ivar 
-//		mpl115a2_read_pressure(); 
-
-		// read temp values from 6 sensors and save to temp_measurements array 
-//		ds18b20_read_temps();
-
 		/*
 	    // Tu nalezy umiescic glowny kod programu
 	    napiecie = buforADC[0] * 8059/10000;                                     //przelicz wartosc wyrazona jako calkowita, 12-bit na rzeczywista
@@ -160,35 +205,6 @@ int main(void)
  	  	sprintf((char *)Tekst, "%2d C\0", temperatura); 
 		printf("%s \n", Tekst);
 		*/
-		
-#endif 
-
-#ifdef PILOT
- 
-		if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart(); 
- 
-		if( rf12_new )	{ 
- 
-			ret = rf12_rxfinish(test);	// sprawdY czy odebrano kompletn1 ramke 
- 
-			if(ret > 0 && ret < 254) {	// brak bledów CRC - odebrana ramka 
-				printf(test);		// wyolij odebrane dane do terminala PC 
-
-				test[16]=0;				// przytnij dane do 16 znaków ASCII 
-			} 
-			else 
-				 
-			if(!ret) {					// wyst1pi3 b31d CRC lub d3ugooci ramki 
-				printf("\r\n"); 
-				printf("--------------------\r\n"); 
-				printf("|  CRC error !!!   |\r\n"); 
-				printf("--------------------\r\n"); 
-				printf("\r\n"); 
-			} 
-		} 
-#endif 
-
-	}; 
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -680,7 +696,7 @@ void TIM_Configuration(void)
 #ifdef PILOT	
 	TIM_TimeBaseStructure.TIM_Period = 10;		// 10ms
 #else
-	TIM_TimeBaseStructure.TIM_Period = 1000;	// 1sek.
+	TIM_TimeBaseStructure.TIM_Period = 1000;	// 0.5 sek.
 #endif
 
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
