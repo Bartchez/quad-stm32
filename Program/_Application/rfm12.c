@@ -37,10 +37,10 @@ void rf12_init( void ) {
 	rf12_rx = 0; rf12_tx = 0; rf12_new = 0;
 
 	// reset rejestrow na rfm12
-//	rf12_trans(0xCA82);
-//	rf12_trans(0xFE00);
-//	rfm12_delay(0x00ffff);
-//	rf12_trans(0x0000);
+	rf12_trans(0xCA82);
+	rf12_trans(0xFE00);
+	rfm12_delay(0x0fffff);
+	rf12_trans(0x0000);
 
 	// ustawinie nowych wartosci w rejestrach
 	rf12_trans(0x80D8);//enable register,433MHz,12.5pF
@@ -57,7 +57,7 @@ void rf12_init( void ) {
 	rf12_trans(0xE000);//NOT USE
 	rf12_trans(0xC800);//NOT USE
 	rf12_trans(0xC000);//1.0MHz,2.2V
-	rf12_trans(0x0000);
+	rf12_trans(0x0000);		
 
 	// odczekaj po inicializacji
 	rfm12_delay(0x00ffff);
@@ -104,11 +104,11 @@ void rf12_pool() {
 	} 
 	
 	else if (rf12_tx) { 
-		rf12_trans(0xB800 | rf12_data[rf12_index]); 
+		rf12_trans(0xB800 | 														rf12_data[rf12_index]); 
  
 		if (!rf12_index)	{ 
 			rf12_tx = 0; 
-			printf("tx off"); 
+			// printf("tx off"); 
 			rf12_trans(0x8208);		// TX off 
 			rf12_read_status(); 
 		} else { 
@@ -130,14 +130,14 @@ uint8_t rf12_rxstart(void) {
 	rf12_index = 0; 
 	rf12_rx = 1; 
 
-	rf12_trans(0x8058); 
- 
-	// fifo reset 
-	rf12_trans(0xCA81);		// disable FIFO mode 
-	rf12_trans(0xCA83);		// enable FIFO mode 
- 
-	rf12_trans(0x82D8);		// RX on 
- 
+	rf12_trans(0x8281);		// RX on 
+//	rf12_trans(0x8058); 
+
+ 	// fifo reset 
+//	rf12_trans(0xCA81);		// disable FIFO mode 
+//	rf12_trans(0xCA83);		// enable FIFO mode 
+
+
 	return(0);				// wszystko w porzadku 
 } 
  

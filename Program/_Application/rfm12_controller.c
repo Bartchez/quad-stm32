@@ -41,6 +41,9 @@ void rf12_controller_send() {
 
 	// send temperature
 	if (rf12_data_type & rf12_temperature) {
+		// read temp values from 6 sensors and save to temp_measurements array 
+		ds18b20_read_temps();
+
 		rf12_controller_send_temperatures();
 	}
 	
@@ -51,6 +54,9 @@ void rf12_controller_send() {
 
 	// send pressure
 	else if (rf12_data_type & rf12_pressure) {
+		// read pressure values sensor and save to mpl115a2_pressure ivar 
+		mpl115a2_read_pressure(); 
+
 		rf12_controller_send_pressur();	
 	}
 

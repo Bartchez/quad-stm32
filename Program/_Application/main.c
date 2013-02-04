@@ -104,6 +104,8 @@ int main(void)
 	/* Init LCD */
 //    S65_init();
 
+	rf12_rxstart(); 
+
 #else
 	/* Init GPS sensor */ 
 	gps_init(); 
@@ -120,7 +122,7 @@ int main(void)
 	{		  
 
 		// send string
-		rf12_txstart(wartoscADC1VTekst, 0);
+//		rf12_txstart(wartoscADC1VTekst, 0);
 
 		// blink LED 
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
@@ -131,12 +133,6 @@ int main(void)
 		Delay_ms(100); 
 
 #ifdef QUAD
-
-		// read pressure values sensor and save to mpl115a2_pressure ivar 
-//		mpl115a2_read_pressure(); 
-
-		// read temp values from 6 sensors and save to temp_measurements array 
-//		ds18b20_read_temps();
 
 		/*
 	    // Tu nalezy umiescic glowny kod programu
@@ -150,27 +146,37 @@ int main(void)
 		
 #endif 
 
-#ifdef PILOTn
+
+#ifdef PILOT
  
-		if( !(rf12_rx || rf12_tx || rf12_new) )  rf12_rxstart(); 
+		if( !(rf12_rx || rf12_tx || rf12_new) )  {
+			rf12_rxstart(); 
+		}
  
 		if( rf12_new )	{ 
  
 			ret = rf12_rxfinish(test);	// sprawdY czy odebrano kompletn1 ramke 
  
 			if(ret > 0 && ret < 254) {	// brak bledów CRC - odebrana ramka 
-				printf(test);		// wyolij odebrane dane do terminala PC 
+				// printf(test);		// wyolij odebrane dane do terminala PC 
 
-				test[16]=0;				// przytnij dane do 16 znaków ASCII 
+			test[50] = 0;				// przytnij dane do 16 znaków ASCII 
+
+			// blink
+			GPIO_WriteBit(LEDS_PORT, LED_BIT_5,
+				(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_5)));
 			} 
 			else 
 				 
 			if(!ret) {					// wyst1pi3 b31d CRC lub d3ugooci ramki 
-				printf("\r\n"); 
-				printf("--------------------\r\n"); 
-				printf("|  CRC error !!!   |\r\n"); 
-				printf("--------------------\r\n"); 
-				printf("\r\n"); 
+			// blink
+			GPIO_WriteBit(LEDS_PORT, LED_BIT_6,
+				(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_6)));
+				// printf("\r\n"); 
+				// printf("--------------------\r\n"); 
+				// printf("|  CRC error !!!   |\r\n"); 
+				// printf("--------------------\r\n"); 
+				// printf("\r\n"); 
 			} 
 		} 
 #endif 

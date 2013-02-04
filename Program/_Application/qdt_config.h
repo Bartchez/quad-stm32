@@ -6,8 +6,8 @@
 #include <stm32f10x.h>
 
 // define QUAD or PILOT
-//#define QUAD
-#define PILOT
+#define QUAD
+//#define PILOT
 
 
 /***

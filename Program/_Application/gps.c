@@ -203,7 +203,7 @@ void gps_pool(void) {
 			for(i=0; i<256; i++)
 			{
 				RxBufferVTG[i] = RxBuffer[i];
-				printf("%c", RxBuffer[i]);
+				// printf("%c", RxBuffer[i]);
 				RxBuffer[i] = 0;
 			}
 			//wyzerowanie licznika
@@ -224,7 +224,7 @@ void gps_pool(void) {
 			for(i=0; i<256; i++)
 			{
 				RxBufferRMC[i] = RxBuffer[i];
-				printf("%c", RxBuffer[i]);
+				// printf("%c", RxBuffer[i]);
 				RxBuffer[i] = 0;
 			}
 			//wyzerowanie licznika

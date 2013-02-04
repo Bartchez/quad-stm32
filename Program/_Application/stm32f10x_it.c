@@ -152,10 +152,16 @@ void EXTI9_5_IRQHandler(void)
 {
 	uint16_t status = 0;
 
-	if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
+#ifdef QUAD
+	uint32_t EXTI_Line = EXTI_Line9;
+#else
+	uint32_t EXTI_Line = EXTI_Line8;
+#endif
+
+	if (EXTI_GetITStatus(EXTI_Line) != RESET) {
 			
 		// wylaczenie flagi obslugi przerwania
-		EXTI_ClearITPendingBit(EXTI_Line9);
+		EXTI_ClearITPendingBit(EXTI_Line);
 
 		// pobranie statusu
 		status = rf12_read_status();
@@ -165,6 +171,10 @@ void EXTI9_5_IRQHandler(void)
 
 			// wyslanie, odebranie bajtu
 			rf12_pool();
+
+			// blink
+			GPIO_WriteBit(LEDS_PORT, LED_BIT_4,
+				(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_4)));
 		}
 	}
 }
@@ -173,8 +183,6 @@ void TIM1_UP_IRQHandler(void) {
 	
 	// przepelnienie liznika
 	if (TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET) {
-		// czyszczenie flagi przerwania
-		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);	
 
 #ifdef QUAD	
 		// send next value
@@ -185,10 +193,13 @@ void TIM1_UP_IRQHandler(void) {
 			(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_4)));
 #endif
 
+		// czyszczenie flagi przerwania
+		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);	
+
 #ifdef PILOT	
   	
 		// karta SD
-//		disk_timerproc();
+		disk_timerproc();
 #endif
 
 	}
