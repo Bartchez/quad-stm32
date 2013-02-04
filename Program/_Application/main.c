@@ -118,25 +118,16 @@ int main(void)
 	// odcekaj po konfuguracji rfm12 
 //	Delay_ms(10); 
 
-//	LS020_fill_screen(GREEN);
+	LS020_fill_screen(GREEN);
 
-	while (1) {		  
-		 LS020_wrcmd(0xaa00);
-		 /*
 		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
 		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
 		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
 		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
 		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
-		*/
-	} 
- 
+
 	while (1)  					   
 	{		  
-
-		// send string
-//		rf12_txstart(wartoscADC1VTekst, 0);
-
 		// blink LED 
 		GPIO_ResetBits(LEDS_PORT, LED_BIT_1); //LED8 ON 
     	GPIO_SetBits(LEDS_PORT, LED_BIT_2);   //LED9 OFF 
@@ -159,7 +150,6 @@ int main(void)
 		
 #endif 
 
-
 #ifdef PILOT
  
 		if( !(rf12_rx || rf12_tx || rf12_new) )  {
@@ -175,21 +165,16 @@ int main(void)
 
 			test[50] = 0;				// przytnij dane do 16 znaków ASCII 
 
-			// blink
+			// poprawnie odebrane dane
 			GPIO_WriteBit(LEDS_PORT, LED_BIT_5,
 				(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_5)));
 			} 
 			else 
 				 
-			if(!ret) {					// wyst1pi3 b31d CRC lub d3ugooci ramki 
-			// blink
-			GPIO_WriteBit(LEDS_PORT, LED_BIT_6,
-				(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_6)));
-				// printf("\r\n"); 
-				// printf("--------------------\r\n"); 
-				// printf("|  CRC error !!!   |\r\n"); 
-				// printf("--------------------\r\n"); 
-				// printf("\r\n"); 
+			if(!ret) { // wyst1pi3 b31d CRC lub d3ugooci ramki 
+				// blink - CRC error
+				GPIO_WriteBit(LEDS_PORT, LED_BIT_6,
+					(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_6)));
 			} 
 		} 
 #endif 
@@ -200,7 +185,7 @@ int main(void)
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void GPIO_Configuration(void)  
 { 
- 
+  
 	GPIO_InitTypeDef  GPIO_InitStructure;  
  
 	/* Configure all unused GPIO port pins in Analog Input mode (floating input 
@@ -259,6 +244,13 @@ void GPIO_Configuration(void)
 	GPIO_Init(RFM12_PORT_SPI, &GPIO_InitStructure); 
 
 #ifdef PILOT 
+	// GPIO for LCD
+ 
+	//PWM 
+	GPIO_InitStructure.GPIO_Pin = PWM_BIT_1; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_Init(PWM_PORT, &GPIO_InitStructure); 
 
 	// GPIO for SD
  
@@ -283,30 +275,36 @@ void GPIO_Configuration(void)
 
 	// GPIO for LCD
  
-	//PWM 
-	GPIO_InitStructure.GPIO_Pin = PWM_BIT_1; 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	GPIO_Init(PWM_PORT, &GPIO_InitStructure); 
- 
     // SD - CS 
     GPIO_InitStructure.GPIO_Pin = LCD_BIT_SS;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(LCD_PORT_SS, &GPIO_InitStructure);
 
-    //SD - SCK, MISO, MOSI
+    //SD - SCK, MOSI
     GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MOSI;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
 
+/*
+    // poprawienie bledu RUDEGO
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    //SD - SCK, MOSI
+    GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MOSI;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
+*/
 	// RS & RESET
     GPIO_InitStructure.GPIO_Pin   = LCD_PIN_RESET | LCD_PIN_RS;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_Init(LCD_PORT_LS020, &GPIO_InitStructure);
-
 #endif 
 
 #ifdef QUAD 
@@ -425,9 +423,6 @@ void RCC_Configuration(void)
 
 	/* TIM1 clock enable */	 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); 
-
-	/* TIM3 clock enable */	 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
  
 #ifdef QUAD 
 	/* USART2 clock enable */ 
@@ -448,8 +443,14 @@ void RCC_Configuration(void)
 #endif 
 
 #ifdef PILOT 
+	/* TIM3 clock enable */	 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
+
 	/* SPI2 clock enable */ 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE); 
+
+	/* SPI3 clock enable */ 
+//    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE); 
 #endif 
 
 } 

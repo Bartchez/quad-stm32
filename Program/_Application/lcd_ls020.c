@@ -406,7 +406,7 @@ void LS020_message_centerXY(uint8_t x,uint8_t y, uint16_t textcolor, uint16_t ba
 
 void SPI_Transmit(uint16_t data) {  
 	uint8_t i;
-
+	
 	for (i = 0; i < 16; i++) {
 		SCK_LOW; // SCK = 0
 
@@ -414,12 +414,14 @@ void SPI_Transmit(uint16_t data) {
 			MOSI_HIGH; // MOSI = 1;
 		else
 			MOSI_LOW;  // MOSI = 0;
-
+	
 		data = data << 1; // shift data
 
 		SCK_HIGH;	// SCK = 1
-	}
+		
 
+	}
+	
 	SCK_LOW; // SCK = 0
 }
 
@@ -434,8 +436,8 @@ void LS020_wrcmd(uint16_t cmd)
 {
   CS_CLR; 								// select Display
   RS_SET; 								// set RS line = Command
-//  while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
-//  SPI_I2S_SendData(SPI2, cmd);						//wyslij dane po SPI do LCD
+//  while (SPI_I2S_GetFlagStatus(LCD_SPI, SPI_I2S_FLAG_TXE) == RESET);
+//  SPI_I2S_SendData(LCD_SPI, cmd);						//wyslij dane po SPI do LCD
   SPI_Transmit(cmd);
   CS_SET;								// deselect Display
  // Delay_ms(10);
@@ -453,8 +455,8 @@ void LS020_wrdat(uint16_t data)
 {
   CS_CLR; 								// select Display
   RS_CLR; 								// clear RS line = data
-//  while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);       
-//  SPI_I2S_SendData(SPI2, data);						//wyslij dane po SPI do LCD
+//  while (SPI_I2S_GetFlagStatus(LCD_SPI, SPI_I2S_FLAG_TXE) == RESET);       
+//  SPI_I2S_SendData(LCD_SPI, data);						//wyslij dane po SPI do LCD
   SPI_Transmit(data);
   CS_SET;								// deselect Display
 
