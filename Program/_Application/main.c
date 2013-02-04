@@ -99,10 +99,10 @@ int main(void)
 #ifdef PILOT
 
 	/* Init SD card */
-//	sd_init();
+	sd_init();
 
 	/* Init LCD */
-//    S65_init();
+    S65_init();
 
 	rf12_rxstart(); 
 
@@ -117,6 +117,19 @@ int main(void)
 	
 	// odcekaj po konfuguracji rfm12 
 //	Delay_ms(10); 
+
+//	LS020_fill_screen(GREEN);
+
+	while (1) {		  
+		 LS020_wrcmd(0xaa00);
+		 /*
+		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
+		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
+		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
+		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
+		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
+		*/
+	} 
  
 	while (1)  					   
 	{		  
@@ -246,13 +259,6 @@ void GPIO_Configuration(void)
 	GPIO_Init(RFM12_PORT_SPI, &GPIO_InitStructure); 
 
 #ifdef PILOT 
-	// GPIO for LCD
- 
-	//PWM 
-	GPIO_InitStructure.GPIO_Pin = PWM_BIT_1; 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	GPIO_Init(PWM_PORT, &GPIO_InitStructure); 
 
 	// GPIO for SD
  
@@ -277,6 +283,12 @@ void GPIO_Configuration(void)
 
 	// GPIO for LCD
  
+	//PWM 
+	GPIO_InitStructure.GPIO_Pin = PWM_BIT_1; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_Init(PWM_PORT, &GPIO_InitStructure); 
+ 
     // SD - CS 
     GPIO_InitStructure.GPIO_Pin = LCD_BIT_SS;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -285,7 +297,7 @@ void GPIO_Configuration(void)
 
     //SD - SCK, MISO, MOSI
     GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MOSI;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
 
@@ -413,14 +425,14 @@ void RCC_Configuration(void)
 
 	/* TIM1 clock enable */	 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); 
+
+	/* TIM3 clock enable */	 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
  
 #ifdef QUAD 
 	/* USART2 clock enable */ 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  
- 
-	/* TIM3 clock enable */	 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
- 
+  
 	/* I2C clock enable */	 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE); 
 
