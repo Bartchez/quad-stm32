@@ -436,16 +436,6 @@
               <FileType>1</FileType>
               <FilePath>..\_Application\MPL115A2.c</FilePath>
             </File>
-            <File>
-              <FileName>lcd_ls020.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\_Application\lcd_ls020.c</FilePath>
-            </File>
-            <File>
-              <FileName>sd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\_Application\sd.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -495,6 +485,16 @@
               <FileName>stm32f10x_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_dma.c</FilePath>
             </File>
           </Files>
         </Group>

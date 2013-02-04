@@ -120,16 +120,22 @@ void pilot_main(void) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 int main(void)  
-{ 
+{  
 
-	volatile unsigned long int i;
-//	unsigned long int napiecie, temperatura;
-//	unsigned char Tekst[7] = {"0\0"};
+	unsigned short int i;
 
-	unsigned char wartoscADC1VTekst[7] = "text\0";
- 
 	/* NVIC Configuration */ 
 	NVIC_Configuration(); 
+
+#ifdef QUAD
+
+	/* DMA Configuration */
+	DMA_Configuration(); 
+
+	/* ADC Configuration */ 
+	ADC_Configuration();
+
+#endif
  
 	/* System Clocks Configuration */ 
 	RCC_Configuration(); 
@@ -151,12 +157,6 @@ int main(void)
  
 	/* I2C Configuration */ 
 	I2C_Configuration(); 
-
-	/* DMA Configuration */
-//	DMA_Configuration(); 
-
-	/* ADC Configuration */ 
-//	ADC_Configuration();
 
 	/* SysTick Configuration */ 
 	SysTick_Configuration(); 
@@ -192,6 +192,8 @@ int main(void)
 		
 		// main for PILOT
 		pilot_main();
+
+		i = buforADC[0];
 	}; 
 
 		// send string
@@ -312,19 +314,6 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
 
-/*
-    // poprawienie bledu RUDEGO
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-    //SD - SCK, MOSI
-    GPIO_InitStructure.GPIO_Pin = LCD_BIT_SCK | LCD_BIT_MOSI;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(LCD_PORT_SPI, &GPIO_InitStructure);
-*/
 	// RS & RESET
     GPIO_InitStructure.GPIO_Pin   = LCD_PIN_RESET | LCD_PIN_RS;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -362,19 +351,18 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(TEMPERATURE_PORT, &GPIO_InitStructure);	 
-  
-/*
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+	// ADC
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-	  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4;   
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;                                   //wejscie analogowe
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
-						*/
+	// ADC
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_0 | GPIO_Pin_1;   
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 #endif 
 } 
  
@@ -768,7 +756,7 @@ void I2C_Configuration(void)
 void DMA_Configuration(void) {
 #ifdef QUAD 
 	//konfigurowanie DMA
-/*
+
 	#define ADC1_DR_Address 0x4001244C;                                             //adres rejestru ADC1->DR
   
 	DMA_InitTypeDef DMA_InitStructure;
@@ -778,7 +766,7 @@ void DMA_Configuration(void) {
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (unsigned long int)ADC1_DR_Address;  //Adres docelowy transferu
 	DMA_InitStructure.DMA_MemoryBaseAddr = (unsigned long int)&buforADC;            //Adres poczatku bloku do przeslania
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;                              //Kierunek transferu
-	DMA_InitStructure.DMA_BufferSize = 2;                                           //Liczba elementow do przeslania (dlugosc bufora)
+	DMA_InitStructure.DMA_BufferSize = 8;                                           //Liczba elementow do przeslania (dlugosc bufora)
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;                //Wylaczenie automatycznego zwiekszania adresu po stronie ADC
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;                         //Wlaczenie automatycznego zwiekszania adresu po stronie pamieci (bufora)
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;     //Rozmiar pojedynczych przesylanych danych po stronie ADC (HalfWord = 16bit)
@@ -790,14 +778,12 @@ void DMA_Configuration(void) {
 
 	//Wlacz DMA, kanal 1
 	DMA_Cmd(DMA1_Channel1, ENABLE);  
-	*/
 #endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void ADC_Configuration(void) {
 #ifdef QUAD 
-/*
 	//konfigurowanie przetwornika AC
 	ADC_InitTypeDef ADC_InitStructure;
 	  
@@ -806,7 +792,7 @@ void ADC_Configuration(void) {
   	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;                					//Pomiar w trybie ciaglym
 	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;					//Brak wyzwalania zewnetrznego
 	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;            					//Wyrownanie danych do prawej - 12 mlodszych bitow znaczacych
-	ADC_InitStructure.ADC_NbrOfChannel = 8; 	                          				//Liczba uzywanych kanalow =2
+	ADC_InitStructure.ADC_NbrOfChannel = 8; 	                          				//Liczba uzywanych kanalow = 8
 	ADC_Init(ADC1, &ADC_InitStructure);                                 				//Incjalizacja przetwornika
 
 	// Voltage - Battery 1 
@@ -823,7 +809,7 @@ void ADC_Configuration(void) {
 	ADC_RegularChannelConfig(ADC1, ADC_CURRENT_1, 1, ADC_SampleTime_1Cycles5); 
   	ADC_RegularChannelConfig(ADC1, ADC_CURRENT_2, 2, ADC_SampleTime_1Cycles5); 
 
-  	ADC_DMACmd(ADC1,ENABLE);                                            				//Wlaczenie DMA dla ADC1
+  	ADC_DMACmd(ADC1, ENABLE);                                            				//Wlaczenie DMA dla ADC1
   	ADC_Cmd(ADC1, ENABLE);						         	            				//Wlacz ADC1
 
 	ADC_ResetCalibration(ADC1);	                                        				//Reset rejestrow kalibracyjnych ADC1
@@ -833,7 +819,6 @@ void ADC_Configuration(void) {
 	while(ADC_GetCalibrationStatus(ADC1));    	                        				//Odczekanie na zakonczenie kalibracji ADC1
 
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);                             				//rozpocznij przetwarzanie AC
-*/
 #endif
 }
 
