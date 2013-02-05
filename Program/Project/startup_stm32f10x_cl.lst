@@ -561,10 +561,9 @@ ARM Macro Assembler    Page 9
               00000200 
               00000000 
 Command Line: --debug --xref --cpu=Cortex-M3 --apcs=interwork --depend=.\startu
-p_stm32f10x_cl.d -o.\startup_stm32f10x_cl.o -IC:\Keil\ARM\RV31\Inc -IC:\Keil\AR
-M\CMSIS\Include -IC:\Keil\ARM\Inc\ST\STM32F10x --predefine="__EVAL SETA 1" --li
-st=.\startup_stm32f10x_cl.lst ..\..\Libraries\CMSIS\Core\CM3\startup\arm\startu
-p_stm32f10x_cl.s
+p_stm32f10x_cl.d -o.\startup_stm32f10x_cl.o -IC:\Keil\ARM\CMSIS\Include -IC:\Ke
+il\ARM\INC\ST\STM32F10x --list=.\startup_stm32f10x_cl.lst ..\..\Libraries\CMSIS
+\Core\CM3\startup\arm\startup_stm32f10x_cl.s
 
 
 
@@ -1727,4 +1726,4 @@ m32f10x_cl.s
       None
 Comment: __use_two_region_memory unused
 2 symbols
-424 symbols in table
+416 symbols in table

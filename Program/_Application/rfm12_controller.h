@@ -42,6 +42,10 @@ void rf12_controller_send_gps(void);
 void rf12_controller_send_tension(void);
 void rf12_controller_send_current(void);
 
+#else
+
+void parse_rfm12 (char *data, int len);
+
 #endif
 
 #endif 

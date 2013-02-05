@@ -12,15 +12,16 @@
  
 // Own libraries 
 //#ifdef PILOT
-#include "sd.h"
-#include "lcd_ls020.h"
+//#include "sd.h"
 //#endif
 
 #ifdef QUAD
 #include "gps.h" 
 #include "18B20.h" 
 #include "MPL115A2.h" 
+#include "lcd.h"
 #endif
+
  
 /* Private typedef -----------------------------------------------------------*/ 
 /* Private define ------------------------------------------------------------*/ 
@@ -104,6 +105,7 @@ int main(void)
 	/* Init LCD */
     S65_init();
 
+	/* RFM12 - rx start */
 	rf12_rxstart(); 
 
 #else
@@ -117,7 +119,7 @@ int main(void)
 	
 	// odcekaj po konfuguracji rfm12 
 //	Delay_ms(10); 
-
+/*
 	LS020_fill_screen(GREEN);
 
 		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
@@ -125,7 +127,7 @@ int main(void)
 		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
 		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
 		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
-
+*/
 	while (1)  					   
 	{		  
 		// blink LED 
@@ -163,7 +165,9 @@ int main(void)
 			if(ret > 0 && ret < 254) {	// brak bledów CRC - odebrana ramka 
 				// printf(test);		// wyolij odebrane dane do terminala PC 
 
-			test[50] = 0;				// przytnij dane do 16 znaków ASCII 
+			parse_rfm12(test, ret);
+			draw_screen_1();
+//			test[80] = 0;				// przytnij dane do 16 znaków ASCII 
 
 			// poprawnie odebrane dane
 			GPIO_WriteBit(LEDS_PORT, LED_BIT_5,
@@ -181,7 +185,7 @@ int main(void)
 
 	}; 
 } 
- 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void GPIO_Configuration(void)  
 { 

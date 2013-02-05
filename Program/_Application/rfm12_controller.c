@@ -11,6 +11,7 @@
 
 //others
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /*! Zmienne globalne */
@@ -119,6 +120,70 @@ void rf12_controller_send_tension() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_controller_send_current() {
 
+}
+
+#else
+
+char buff[100];
+
+/*C substring function: It returns a pointer to the substring */
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void substring(char *string, int position, int length) {
+    
+    int c;
+    
+    for (c = 0 ; c < length ; c++) {
+		buff[c] = string[position + c -1];
+    }
+    
+    buff[length] = '\0';
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void parse_rfm12(char *data, int len) {
+	int c = 0, i, pos = 1;
+    
+	// get message id
+	char id = data[0];
+
+	// exit if empty array
+	if (len == 0) return;
+        
+	// iterate all array and find ',' sign
+	for (i = 1; i <= len; i++) {
+
+        // if comma or end of message
+        if (data[i] == ',' || i == len) {
+
+            // get substring
+            substring(data, pos + 1, i - pos);
+            pos = i + 1;
+            
+            if (id == RFM12_TEMPERATURE_CMD) {
+				// save temperature
+				temp_measurements[c] = atof(buff);
+            }
+            
+            else if (id == RFM12_GPS_CMD) {
+                
+            }
+
+            else if (id == RFM12_PRESSURE_CMD) {
+                
+            }
+
+            else if (id == RFM12_TENSION_CMD) {
+                
+            }
+
+            else if (id == RFM12_CURRENT_CMD) {
+                
+            }
+
+			// id of param
+			c++;
+        }
+	}
 }
 
 #endif
