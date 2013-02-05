@@ -4,22 +4,22 @@
  
 // Configurations 
 #include "qdt_config.h" 
-#include "core_cm3.h" 
+//#include "core_cm3.h" 
 
 // Common files
 #include "rfm12_controller.h" 
 #include "rfm12.h" 
  
 // Own libraries 
-//#ifdef PILOT
+#ifdef PILOT
 //#include "sd.h"
-//#endif
+#include "lcd.h"
+#endif
 
 #ifdef QUAD
 #include "gps.h" 
 #include "18B20.h" 
 #include "MPL115A2.h" 
-#include "lcd.h"
 #endif
 
  
@@ -100,7 +100,7 @@ int main(void)
 #ifdef PILOT
 
 	/* Init SD card */
-	sd_init();
+//	sd_init();
 
 	/* Init LCD */
     S65_init();
@@ -166,8 +166,7 @@ int main(void)
 				// printf(test);		// wyolij odebrane dane do terminala PC 
 
 			parse_rfm12(test, ret);
-			draw_screen_1();
-//			test[80] = 0;				// przytnij dane do 16 znaków ASCII 
+			draw_screen_3();
 
 			// poprawnie odebrane dane
 			GPIO_WriteBit(LEDS_PORT, LED_BIT_5,
@@ -607,6 +606,8 @@ void SPI_Configuration(void) {
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 void USART_Configuration(void) { 
+ 
+#ifdef QUAD 
 	USART_InitTypeDef USART_InitStructure;  
  
  	// dlugosc slowa = 8 bitow 
@@ -617,11 +618,7 @@ void USART_Configuration(void) {
 	USART_InitStructure.USART_Parity = USART_Parity_No; 
 	// Kontrola przeplywu danych wylaczona 
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; 
- 
- 
-	/* USART for GPS */ 
- 
-#ifdef QUAD 
+
 	// reset 
 	USART_DeInit(GPS_USART); 
  	// predkosc transmisji = 9600 

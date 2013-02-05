@@ -33,13 +33,17 @@
 *******************************************************************************/
 void USART_Configuration2(void)
 { 
+	  /*
   GPIO_InitTypeDef GPIO_InitStructure;
   USART_InitTypeDef USART_InitStructure; 
 
   RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1,ENABLE);
+
+  */
   /*
   *  USART1_TX -> PA9 , USART1_RX ->	PA10
-  */				
+  */	
+  /*			
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;	         
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
@@ -62,6 +66,7 @@ void USART_Configuration2(void)
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
   USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
   USART_Cmd(USART1, ENABLE);
+  */
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void UsartGPIO_CTRT_Configuration(void)
@@ -81,7 +86,7 @@ void UsartGPIO_CTRT_Configuration(void)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void USART_CTRT_Configuartion(void)
-{
+{	  /*
 	USART_InitTypeDef USART_InitStruct;
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO,ENABLE);
@@ -98,6 +103,7 @@ void USART_CTRT_Configuartion(void)
 	USART_Cmd(USART1, ENABLE);
 
 	UsartGPIO_CTRT_Configuration();
+	*/
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Use no semihosting */
@@ -121,16 +127,17 @@ _sys_exit(int x)
   * @retval None
   */
 PUTCHAR_PROTOTYPE
-{
+{		 
   /* Place your implementation of fputc here */
   /* e.g. write a character to the USART */
-  USART_SendData(USART1, (uint8_t) ch);
+
+//  USART_SendData(USART1, (uint8_t) ch);
 	//USART_SendData(USART1,(u8)ch);
 
   /* Loop until the end of transmission */
-  while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
+//  while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
 	//while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
-  {}
+//  {}
 
-  return ch;
+  //return ch;
 }

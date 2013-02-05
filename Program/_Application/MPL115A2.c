@@ -7,7 +7,8 @@
 
 // keep measured pressur
 volatile float mpl115a2_pressure;
-volatile char mpl115a2_pressure_string[10]; 
+volatile float mpl115a2_temp;
+volatile char mpl115a2_pressure_string[20]; 
 
 //*******************************************************************************************
 void mpl115a2_read_pressure(void) 
@@ -21,8 +22,11 @@ void mpl115a2_read_pressure(void)
 	// save pressure value
 	mpl115a2_pressure = pomiar[0]; 
 
+	// save temp value
+	mpl115a2_temp = pomiar[1];
+
 	// create output string	
-    sprintf(mpl115a2_pressure_string, "X%f", mpl115a2_pressure);    
+    sprintf(mpl115a2_pressure_string, "X%.3f,%.3f", mpl115a2_pressure, mpl115a2_temp);    
 
 //	printf("\r\n Pressure: %4.1f hPa ", pomiar[0]);          //wyslanie po uart pomiarow
 //	printf("     Temperatura: %2.1f ^C", pomiar[1]);

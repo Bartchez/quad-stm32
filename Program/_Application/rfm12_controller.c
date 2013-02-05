@@ -103,13 +103,6 @@ void rf12_controller_send_gps() {
 	// send string
 	rf12_txstart(gps_string, 0);
 
-/*
-char* gps_time(void); // zwraca tablice 12 znakow (rok,miesiac,dzien,godzina,minuta,sekunda) np. 120501120311
-char* gps_latitude(void); //zwraca szerokosc geograficzna, 10 znakow, podaje wartosc w ulamkach stopnia, ostatni znak - polkula
-char* gps_longitude(void); //zwraca dlugosc geograficzna, 11 znakow, podaje wartosc w ulamkach stopnia, ostatni znak - polkula
-char* gps_speed(void); // zwraca predkosc w m/s, 5 znkow, najmniej znaczace dwie cyfry sa wartociami dziesietnymi i setnymi predkosci
-char* gps_direction(void); //zwraca kierunek przemieszczania w stopniach, 5 znaki, najmniej znaczace dwie cyfry sa wartociami dziesietnymi i setnymi predkosci
-*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +117,7 @@ void rf12_controller_send_current() {
 
 #else
 
-char buff[100];
+char buff[30];
 
 /*C substring function: It returns a pointer to the substring */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -137,6 +130,15 @@ void substring(char *string, int position, int length) {
     }
     
     buff[length] = '\0';
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void rewrite(char* begin, uint8_t count) {
+	uint8_t i;
+	
+	for (i=0; i<count; i++) {
+		begin[i] = buff[i];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,11 +167,32 @@ void parse_rfm12(char *data, int len) {
             }
             
             else if (id == RFM12_GPS_CMD) {
-                
+
+				if (c == 0) {
+					rewrite(gps_time_tab, 13);
+				}
+				else if (c == 1) {
+					rewrite(gps_latitude_tab, 11);
+				}      
+				else if (c == 2) {
+					rewrite(gps_longitude_tab, 12);
+				}      
+				else if (c == 3) {
+					rewrite(gps_speed_tab, 7);
+				}      
+				else if (c == 4) {
+					rewrite(gps_direction_tab, 6);
+				}          
             }
 
             else if (id == RFM12_PRESSURE_CMD) {
-                
+				if (c == 0) {
+	            	mpl115a2_pressure = atof(buff);
+				}     
+
+				if (c == 1) {
+	            	mpl115a2_temp = atof(buff);
+				}     
             }
 
             else if (id == RFM12_TENSION_CMD) {

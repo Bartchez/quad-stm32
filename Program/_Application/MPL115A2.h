@@ -11,9 +11,10 @@
 
 // keep measured pressur
 extern volatile float mpl115a2_pressure;
+extern volatile float mpl115a2_temp;
 
 // keep measured pressur as array of chars
-extern volatile char mpl115a2_pressure_string[10]; 
+extern volatile char mpl115a2_pressure_string[20]; 
 
 // read pressure values sensor and save to mpl115a2_pressure ivar
 void mpl115a2_read_pressure(void);

@@ -8,6 +8,14 @@ volatile char RxBuffer[256]; //bufor tymczasowy, przechowuje dane odebrane z USA
 volatile char RxBufferVTG[256]; //przechowuje wartosci przepusane z RxBuffer, jezeli zdanie rozpoczyna sie na VTG
 volatile char RxBufferRMC[256]; //przechowuje wartosci przepusane z RxBuffer, jezeli zdanie rozpoczyna sie na RMC
 
+//#ifdef PILOT
+ char gps_time_tab[13];
+ char gps_latitude_tab[11];
+ char gps_longitude_tab[12];
+ char gps_speed_tab[7];
+ char gps_direction_tab[6];
+//#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void gps_init(void)
 {
@@ -25,7 +33,7 @@ void gps_init(void)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 char* gps_time()
 {
-	static char array[12];
+	static char array[13];
 
 	//rok
 	array[0] = RxBufferRMC[61];
@@ -50,7 +58,8 @@ char* gps_time()
 	//sekundy
 	array[10] = RxBufferRMC[11];
 	array[11] = RxBufferRMC[12];
-	
+	array[12] = '\0';
+		
 	return array;
 }
 
@@ -58,7 +67,7 @@ char* gps_time()
 char* gps_latitude(void) 
 {
 	uint8_t i;
-   	static char array[10];
+   	static char array[11];
 
 	//aktualizacja szerokosci geograficznej
 	array[0] = RxBufferRMC[20];
@@ -84,6 +93,7 @@ char* gps_latitude(void)
 	array[7] = '0';
 	array[8] = '0';
 	array[9] = RxBufferRMC[30];
+	array[10] = '\0';
 
 	return array;
 }
@@ -91,7 +101,7 @@ char* gps_latitude(void)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 char* gps_longitude(void) {
 	uint8_t i;
-   	static char array[11];
+   	static char array[12];
 
 	//aktualizacja dlugosci geograficznej
 	array[0] = RxBufferRMC[32];
@@ -118,6 +128,7 @@ char* gps_longitude(void) {
 	array[8] = '0';
 	array[9] = '0';
 	array[10] = RxBufferRMC[43];
+	array[11] = '\0';
 
 	return array;
 
@@ -127,7 +138,7 @@ char* gps_longitude(void) {
 char* gps_speed(void) {
 	
 	uint8_t i;
-   	static char array[5];
+   	static char array[7];
 
 	//przeliczenie wartosci km/h na m/s
 	//najmniej znaczace dwie cyfry sa wartociami
@@ -148,6 +159,7 @@ char* gps_speed(void) {
 	i = i % 100;
 	array[3] = (i / 10) + 0x30;
 	array[4] = (i % 10) + 0x30;
+	array[5] = '\0';
 	
 	return array;				
 }
@@ -155,13 +167,14 @@ char* gps_speed(void) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 char* gps_direction(void) {
 
-   	static char array[5];
+   	static char array[6];
 
 	array[0] = RxBufferRMC[50];
 	array[1] = RxBufferRMC[51];
 	array[2] = RxBufferRMC[52];
 	array[3] = RxBufferRMC[54];
 	array[4] = RxBufferRMC[55];
+	array[5] = '\0';
 	
 	return array;				
 }
