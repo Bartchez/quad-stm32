@@ -100,6 +100,9 @@ uint8_t sd_write_line(const char* path, char* text, uint8_t size, uint8_t append
 	
 	// write text fo file
     fresult = f_write(&file, text, size, &savedBytes);	           
+
+	// new line
+    fresult = f_write (&file, (const void*)"\r\n", 2, &savedBytes);
 	
 	// if any problems
     if (fresult) {

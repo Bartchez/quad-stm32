@@ -66,9 +66,19 @@ void BaroGetPressure(float *PreTemp)
     c12 = c2f(buf[10], buf[11], 14, 13, 9);
     c11 = c2f(buf[12], buf[13], 11, 10, 11);
     c22 = c2f(buf[14], buf[15], 11, 10, 15);
-	
+
 	pcomp = a0 + (b1 + c11 * padc + c12 * tadc) * padc + (b2 + c22 * tadc) * tadc;
-	PreTemp[0] = pcomp * 650 / 1023 + 500;
-    PreTemp[1] = (25 + ((tadc - 498.0) / -5.35));
+
+	PreTemp[0] = pcomp * 650.0f / 1023.0f + 200.0f;
+    PreTemp[1] = (25.0f + ((tadc - 498.0f) / -5.35f));
+
+/*
+ // See datasheet p.6 for evaluation sequence
+  pressureComp = _mpl115a2_a0 + (_mpl115a2_b1 + _mpl115a2_c12 * temp ) * pressure + _mpl115a2_b2 * temp;
+
+  // Return pressure and temperature as floating point values
+  *P = ((65.0F / 1023.0F) * pressureComp) + 50.0F; // kPa
+  *T = ((float) temp - 498.0F) / -5.35F +25.0F; // C
+*/
 }
 

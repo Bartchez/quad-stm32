@@ -22,10 +22,10 @@ extern volatile char gps_string[50];
 
 //#ifdef PILOT
 extern char gps_time_tab[13];
-extern char gps_latitude_tab[11];
+extern char gps_latitude_tab[12];
 extern char gps_longitude_tab[12];
 extern char gps_speed_tab[7];
-extern char gps_direction_tab[6];
+extern char gps_direction_tab[4];
 //#endif
 
 // ustawia GPIO, USART2, NVIC, wywalsc raz w main.c

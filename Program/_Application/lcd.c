@@ -14,10 +14,35 @@
 
 uint8_t buffer[20];
 uint8_t LCD_CURRENT_SCREEN;
-	   
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void detect_button(void) {
+
+	uint8_t new_screen = LCD_CURRENT_SCREEN;
+
+	Delay_ms(10);
+
+	if (!GPIO_ReadInputDataBit(GPIOG, BUTTON1_LEFT)) {
+		if ((new_screen - 1) <= 0) {
+			new_screen = 6;
+		}
+		
+		switch_to_screan(new_screen -1);
+	}
+
+	if (!GPIO_ReadInputDataBit(GPIOG, BUTTON1_RIGHT)) {
+		if ((new_screen + 1) >= 6) {
+			new_screen = 0;
+		}
+		
+		switch_to_screan(new_screen +1);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void lcd_fill_with_color(uint8_t color) {
-	LS020_DrawRect(128, 2, 2, 173, color);   	  								
+	LS020_fill_screen(color);   	  								
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,18 +52,44 @@ void switch_to_screan(uint8_t screen) {
 	}	
 
 	LCD_CURRENT_SCREEN = screen;
+
+	if (screen == 1 ) {
+		draw_screen_1();
+	}
+	else if (screen == 2 ) {
+		draw_screen_2();
+	}
+	else if (screen == 3 ) {
+		draw_screen_3();
+	}
+	else if (screen == 4 ) {
+		draw_screen_4();
+	}
+	else if (screen == 5 ) {
+		draw_screen_5();
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void draw_screen_0(void) {
-	switch_to_screan(0);
-	LCD_CURRENT_SCREEN = 255;
+	LS020_clrscr();
+	LCD_CURRENT_SCREEN = 0;
+	lcd_fill_with_color(BLUE);   	  								
+
+	// create output string
+	LS020_message_centerXY(MIN_X, 90, BLUE, WHITE, "PRACA");
+	LS020_message_centerXY(MIN_X, 70, BLUE, WHITE, "INZYNIERSKA");
+
+	LS020_message_centerXY(MIN_X, 50, BLUE, WHITE, "B. LEBIODA");
+	LS020_message_centerXY(MIN_X, 30, BLUE, WHITE, "E. WOJTASZEK");
+
+	LS020_message_centerXY(MIN_X, 10, BLUE, WHITE, "PP 2012");
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void draw_screen_1(void) {
-	switch_to_screan(1);
-	lcd_fill_with_color(BLACK);   	  								
+	lcd_fill_with_color(GREEN);   	  								
 	LS020_message_centerXY(45, 110, GREEN, BLACK, "TEMPERATURA");
 
 	// create output string
@@ -60,8 +111,7 @@ void draw_screen_1(void) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void draw_screen_2(void) {
-	switch_to_screan(2);
-	lcd_fill_with_color(RED); 
+	lcd_fill_with_color(BLACK); 
 
 	LS020_message_centerXY(50, 100, BLACK, WHITE, "CISNIENIE");
     sprintf(buffer, "%.3f hPa", mpl115a2_pressure);    
@@ -72,8 +122,7 @@ void draw_screen_2(void) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void draw_screen_3(void) {
-	switch_to_screan(3);
-	lcd_fill_with_color(BLACK); 
+	lcd_fill_with_color(WHITE); 
 	LS020_message_centerXY(75,110,WHITE,BLACK,"GPS");
 
     sprintf(buffer, " CZAS: %s", gps_time_tab);    
@@ -82,16 +131,15 @@ void draw_screen_3(void) {
 	LS020_message_centerXY(MIN_X, 78, WHITE,BLACK, buffer);
     sprintf(buffer, " DLU. GEO: %s", gps_longitude_tab);    
 	LS020_message_centerXY(MIN_X, 66, WHITE,BLACK, buffer);
-    sprintf(buffer, " KIERUNEK: %s", gps_speed_tab);    
+    sprintf(buffer, " PREDKOSC: %s", gps_speed_tab);    
 	LS020_message_centerXY(MIN_X, 54, WHITE,BLACK, buffer);
-    sprintf(buffer, " PREDKOSC: %s", gps_direction_tab);    
+    sprintf(buffer, " KIERUNEK: %s", gps_direction_tab);    
 	LS020_message_centerXY(MIN_X, 42, WHITE,BLACK, buffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void draw_screen_4(void) {
-	switch_to_screan(4);
-	lcd_fill_with_color(BLACK);   	  								
+	lcd_fill_with_color(BLUE);   	  								
 
 	LS020_message_centerXY(50, 110, BLUE, WHITE, "BATERIA 1");
 	LS020_message_centerXY(MIN_X, 90, BLUE, WHITE, " NAPIECIE: %d,%03dV");
@@ -102,8 +150,8 @@ void draw_screen_4(void) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void draw_screen_5(void) {
-	switch_to_screan(5);
-	lcd_fill_with_color(BLACK); 
+	lcd_fill_with_color(YELLOW); 
+
 	LS020_message_centerXY(50, 110, YELLOW, BLACK, "BATERIA 2");
 	LS020_message_centerXY(MIN_X, 90, YELLOW, BLACK, " NAPIECIE: %d,%03dV");
 	LS020_message_centerXY(MIN_X, 78, YELLOW, BLACK, " NAPIECIE: %d,%03dV");

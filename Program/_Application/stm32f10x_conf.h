@@ -42,13 +42,12 @@
 #include "stm32f10x_tim.h"
 #include "stm32f10x_flash.h"
 #include "stm32f10x_i2c.h"
-#include "misc.h"  /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
 
-#ifdef QUAD
 #include "stm32f10x_usart.h"
 #include "stm32f10x_adc.h"
 #include "stm32f10x_dma.h"
-#endif
+
+#include "misc.h"  /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/

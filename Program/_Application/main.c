@@ -12,7 +12,7 @@
  
 // Own libraries 
 #ifdef PILOT
-//#include "sd.h"
+#include "sd.h"
 #include "lcd.h"
 #endif
 
@@ -100,13 +100,16 @@ int main(void)
 #ifdef PILOT
 
 	/* Init SD card */
-//	sd_init();
+	sd_init();
 
 	/* Init LCD */
     S65_init();
 
 	/* RFM12 - rx start */
 	rf12_rxstart(); 
+
+	// draw init screen			  
+	draw_screen_0();
 
 #else
 	/* Init GPS sensor */ 
@@ -117,17 +120,6 @@ int main(void)
 
 #endif
 	
-	// odcekaj po konfuguracji rfm12 
-//	Delay_ms(10); 
-/*
-	LS020_fill_screen(GREEN);
-
-		LS020_message_centerXY(20,30,GREEN,BLACK,"Test wyswietlacza");
-		LS020_put_char_maxXY(10, 60, RED, GREEN, 5, "T");
-		LS020_put_char_maxXY(50, 60, WHITE, GREEN, 5, "E");
-		LS020_put_char_maxXY(90, 60, YELLOW, GREEN, 5, "S");
-		LS020_put_char_maxXY(130, 60, BLUE, GREEN, 5, "T");
-*/
 	while (1)  					   
 	{		  
 		// blink LED 
@@ -138,21 +130,10 @@ int main(void)
     	GPIO_ResetBits(LEDS_PORT, LED_BIT_2); //LED8 OFF 
 		Delay_ms(100); 
 
-#ifdef QUAD
-
-		/*
-	    // Tu nalezy umiescic glowny kod programu
-	    napiecie = buforADC[0] * 8059/10000;                                     //przelicz wartosc wyrazona jako calkowita, 12-bit na rzeczywista
- 	  	sprintf((char *)Tekst, "%d,%03d V\0", napiecie / 1000, napiecie % 1000); //Dzielenie calkowite wyznacza wartosc w V,  dzielenie modulo - czeasc po przecinku
-		printf("%s", Tekst);
-   		temperatura = (1430 - buforADC[1] * 8059/10000)*10/43+25;                //przelicz wartosc wyrazona jako calkowita, 12-bit na rzeczywista, wartosci typowe wg. Datasheet, 5.3.18, str. 75.
- 	  	sprintf((char *)Tekst, "%2d C\0", temperatura); 
-		printf("%s \n", Tekst);
-		*/
-		
-#endif 
-
 #ifdef PILOT
+
+		// check button change
+		detect_button();
  
 		if( !(rf12_rx || rf12_tx || rf12_new) )  {
 			rf12_rxstart(); 
@@ -163,14 +144,17 @@ int main(void)
 			ret = rf12_rxfinish(test);	// sprawdY czy odebrano kompletn1 ramke 
  
 			if(ret > 0 && ret < 254) {	// brak bledów CRC - odebrana ramka 
-				// printf(test);		// wyolij odebrane dane do terminala PC 
+				
+				// save data to file on SD cart
+				sd_write_line("quad.txt", test, ret, 1);
 
-			parse_rfm12(test, ret);
-			draw_screen_3();
+				// pars reviced data
+				parse_rfm12(test, ret);
 
-			// poprawnie odebrane dane
-			GPIO_WriteBit(LEDS_PORT, LED_BIT_5,
-				(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_5)));
+				// poprawnie odebrane dane
+				GPIO_WriteBit(LEDS_PORT, LED_BIT_5,
+					(BitAction)(1 - GPIO_ReadOutputDataBit(LEDS_PORT, LED_BIT_5)));
+
 			} 
 			else 
 				 
@@ -181,7 +165,6 @@ int main(void)
 			} 
 		} 
 #endif 
-
 	}; 
 } 
 
@@ -203,7 +186,7 @@ void GPIO_Configuration(void)
 	GPIO_Init(GPIOC, &GPIO_InitStructure);  
 
 	// GPIO for COM
-/* 
+
 	// USART1 - TX 
     GPIO_InitStructure.GPIO_Pin = COM_BIT_TX;	          
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  
@@ -216,7 +199,6 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;   
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;  
     GPIO_Init(COM_PORT, &GPIO_InitStructure); 
-*/
 
 	// GPIO for LEDs
 
@@ -634,9 +616,10 @@ void USART_Configuration(void) {
 	// Wlaczenie USART 
 	USART_Cmd(GPS_USART, ENABLE); 
 #endif 
- 
 	/* USART for COM */ 
+
 /* 
+
 	// reset 
 	USART_DeInit(COM_USART); 
  	// predkosc transmisji = 115200 
@@ -652,7 +635,6 @@ void USART_Configuration(void) {
 	// Wlaczenie USART 
 	USART_Cmd(COM_USART, ENABLE); 
 */
-
 } 
  
 //////////////////////////////////////////////////////////////////////////////////////////////////// 

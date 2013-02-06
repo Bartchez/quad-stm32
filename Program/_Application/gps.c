@@ -10,10 +10,10 @@ volatile char RxBufferRMC[256]; //przechowuje wartosci przepusane z RxBuffer, je
 
 //#ifdef PILOT
  char gps_time_tab[13];
- char gps_latitude_tab[11];
+ char gps_latitude_tab[12];
  char gps_longitude_tab[12];
  char gps_speed_tab[7];
- char gps_direction_tab[6];
+ char gps_direction_tab[4];
 //#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,21 +31,30 @@ void gps_init(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+void create_gps_string(void) {
+    sprintf(gps_string, "X%s,%s,%s,%s,%s\0", gps_time(), 
+											 gps_latitude(),
+					  						 gps_longitude(), 
+											 gps_speed(), 
+											 gps_direction());    
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 char* gps_time()
 {
 	static char array[13];
 
 	//rok
-	array[0] = RxBufferRMC[61];
-	array[1] = RxBufferRMC[62];
+	array[0] = RxBufferRMC[59];
+	array[1] = RxBufferRMC[60];					  	
 	
 	//miesiac
-	array[2] = RxBufferRMC[59];
-	array[3] = RxBufferRMC[60];
+	array[2] = RxBufferRMC[57];
+	array[3] = RxBufferRMC[58];
 	
 	//dzien
-	array[4] = RxBufferRMC[57];
-	array[5] = RxBufferRMC[58];
+	array[4] = RxBufferRMC[55];
+	array[5] = RxBufferRMC[56];
 	
 	//godziny
 	array[6] = RxBufferRMC[7];
@@ -131,14 +140,13 @@ char* gps_longitude(void) {
 	array[11] = '\0';
 
 	return array;
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 char* gps_speed(void) {
 	
 	uint8_t i;
-   	static char array[7];
+   	static char array[6];
 
 	//przeliczenie wartosci km/h na m/s
 	//najmniej znaczace dwie cyfry sa wartociami
@@ -167,14 +175,12 @@ char* gps_speed(void) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 char* gps_direction(void) {
 
-   	static char array[6];
+   	static char array[4];
 
-	array[0] = RxBufferRMC[50];
-	array[1] = RxBufferRMC[51];
-	array[2] = RxBufferRMC[52];
-	array[3] = RxBufferRMC[54];
-	array[4] = RxBufferRMC[55];
-	array[5] = '\0';
+	array[0] = RxBufferRMC[30];
+	array[1] = '/';
+	array[2] = RxBufferRMC[43];
+	array[3] = '\0';
 	
 	return array;				
 }
@@ -216,9 +222,12 @@ void gps_pool(void) {
 			for(i=0; i<256; i++)
 			{
 				RxBufferVTG[i] = RxBuffer[i];
-				// printf("%c", RxBuffer[i]);
 				RxBuffer[i] = 0;
 			}
+
+			// create output
+			create_gps_string();
+
 			//wyzerowanie licznika
 			RxCounter = 0;
 		}
@@ -237,9 +246,12 @@ void gps_pool(void) {
 			for(i=0; i<256; i++)
 			{
 				RxBufferRMC[i] = RxBuffer[i];
-				// printf("%c", RxBuffer[i]);
 				RxBuffer[i] = 0;
 			}
+
+			// create output
+			create_gps_string();
+
 			//wyzerowanie licznika
 			RxCounter = 0;
 		}
@@ -253,11 +265,6 @@ void gps_pool(void) {
 			RxCounter = 0;
 		}
 	}
-
-	// create output string
-    sprintf(gps_string, "X:%s,%s,%s,%s,%s", gps_time(), gps_latitude(),
-					  									  gps_longitude(), gps_speed(), 
-														  gps_direction());    
 
 }
 
