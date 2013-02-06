@@ -8,6 +8,7 @@
 #include "18b20.h"
 #include "gps.h"
 #include "MPL115A2.h"
+#include "battery.h"
 
 //others
 #include <stdio.h>
@@ -36,7 +37,7 @@ void rf12_controller_send() {
 	}
   */
 	// reset counter
-	if (rf12_data_type > rf12_tension) {
+	if (rf12_data_type > rf12_current) {
 		rf12_data_type = rf12_temperature;
 	}
 
@@ -106,12 +107,28 @@ void rf12_controller_send_gps() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_controller_send_tension() {
+	// create output string
+    sprintf(adc_string, "X%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", buforADC[0] * 8059/10000, 
+														  buforADC[1] * 8059/10000,
+						   								  buforADC[2] * 8059/10000, 
+														  buforADC[3] * 8059/10000, 
+														  buforADC[4] * 8059/10000, 
+														  buforADC[5] * 8059/10000);    
+	adc_string[0] = RFM12_TENSION_CMD;
 
+	// send string
+	rf12_txstart(adc_string, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void rf12_controller_send_current() {
+	// create output string
+    sprintf(adc_string, "X%.1f,%.1f", buforADC[6] * 8059/10000, 
+									  buforADC[7] * 8059/10000);    
+	adc_string[0] = RFM12_CURRENT_CMD;
 
+	// send string
+	rf12_txstart(adc_string, 0);
 }
 
 #else
@@ -195,11 +212,11 @@ void parse_rfm12(char *data, int len) {
             }
 
             else if (id == RFM12_TENSION_CMD) {
-                
+				battery_values[c] = atof(buff);
             }
 
             else if (id == RFM12_CURRENT_CMD) {
-                
+				battery_values[c+5] = atof(buff);
             }
 
 			// id of param

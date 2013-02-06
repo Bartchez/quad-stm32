@@ -5,6 +5,7 @@
 #include "18B20.h"
 #include "MPL115A2.h"
 #include "gps.h"
+#include "battery.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -42,7 +43,8 @@ void detect_button(void) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void lcd_fill_with_color(uint8_t color) {
-	LS020_fill_screen(color);   	  								
+	LS020_fill_screen(color);   	  
+	LS020_DrawRect(128,2,2,173,color);									
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,10 +144,15 @@ void draw_screen_4(void) {
 	lcd_fill_with_color(BLUE);   	  								
 
 	LS020_message_centerXY(50, 110, BLUE, WHITE, "BATERIA 1");
-	LS020_message_centerXY(MIN_X, 90, BLUE, WHITE, " NAPIECIE: %d,%03dV");
-	LS020_message_centerXY(MIN_X, 78, BLUE, WHITE, " NAPIECIE: %d,%03dV");
-    LS020_message_centerXY(MIN_X, 66, BLUE, WHITE, " NAPIECIE: %d,%03dV");
-	LS020_message_centerXY(MIN_X, 54, BLUE, WHITE, " NATEZENIE: %d,%03dA");
+
+    sprintf(buffer, " NAPIECIE: %.1f", battery_values[0]);    
+	LS020_message_centerXY(MIN_X, 90, BLUE, WHITE, buffer);
+    sprintf(buffer, " NAPIECIE: %.1f", battery_values[1]);    
+	LS020_message_centerXY(MIN_X, 78, BLUE, WHITE, buffer);
+    sprintf(buffer, " NAPIECIE: %.1f", battery_values[2]);    
+    LS020_message_centerXY(MIN_X, 66, BLUE, WHITE, buffer);
+    sprintf(buffer, " NATEZENIE: %.1f", battery_values[6]);    
+	LS020_message_centerXY(MIN_X, 54, BLUE, WHITE, buffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,10 +160,15 @@ void draw_screen_5(void) {
 	lcd_fill_with_color(YELLOW); 
 
 	LS020_message_centerXY(50, 110, YELLOW, BLACK, "BATERIA 2");
-	LS020_message_centerXY(MIN_X, 90, YELLOW, BLACK, " NAPIECIE: %d,%03dV");
-	LS020_message_centerXY(MIN_X, 78, YELLOW, BLACK, " NAPIECIE: %d,%03dV");
-	LS020_message_centerXY(MIN_X, 66, YELLOW, BLACK, " NAPIECIE: %d,%03dV");
-	LS020_message_centerXY(MIN_X, 54, YELLOW, BLACK, " NATEZENIE: %d,%03dA");
+   
+    sprintf(buffer, " NAPIECIE: %.1f", battery_values[3]);    
+	LS020_message_centerXY(MIN_X, 90, BLUE, WHITE, buffer);
+    sprintf(buffer, " NAPIECIE: %.1f", battery_values[4]);    
+	LS020_message_centerXY(MIN_X, 78, BLUE, WHITE, buffer);
+    sprintf(buffer, " NAPIECIE: %.1f", battery_values[5]);    
+    LS020_message_centerXY(MIN_X, 66, BLUE, WHITE, buffer);
+    sprintf(buffer, " NATEZENIE: %.1f", battery_values[7]);    
+	LS020_message_centerXY(MIN_X, 54, BLUE, WHITE, buffer);
 }
 
 
